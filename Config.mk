@@ -57,5 +57,9 @@ ifeq ($(CONFIG_CMSIS),y)
   endif
 endif
 
+ifeq ($(CONFIG_NETUTILS_LIBCOAP),y)
+  EFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(APPDIR)/external/system/libcoap/include}
+endif
+
 CFLAGS   += $(EFLAGS)
 CXXFLAGS += $(EFLAGS)

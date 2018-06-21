@@ -11,6 +11,8 @@ core
 .gdbinit
 cscope.out
 /bootloader
+/example/headset
+/frameworks/bluetooth_manager
 /system
 /services
 /tools

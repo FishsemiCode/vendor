@@ -35,6 +35,7 @@
 ############################################################################
 
 EFLAGS =
+EXXFLAGS =
 
 ifeq ($(CONFIG_CMSIS),y)
     EFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(APPDIR)/external/system/cmsis/CMSIS/Core/Include}
@@ -58,8 +59,29 @@ ifeq ($(CONFIG_CMSIS),y)
 endif
 
 ifeq ($(CONFIG_NETUTILS_LIBCOAP),y)
-  EFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(APPDIR)/external/system/libcoap/include}
+    EFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(APPDIR)/external/system/libcoap/include}
+endif
+
+ifeq ($(CONFIG_CODEC_HELIXAAC),y)
+    EFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(APPDIR)/external/system/codec/libhelix-aac}
+endif
+
+ifeq ($(CONFIG_CODEC_FAAD2),y)
+    EFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(APPDIR)/external/system/codec/faad2/include}
+endif
+
+ifeq ($(CONFIG_CODEC_FDKAAC),y)
+    EXXFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(APPDIR)/external/system/codec/fdk-aac/libAACdec/include}
+    EXXFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(APPDIR)/external/system/codec/fdk-aac/libFDK/include}
+    EXXFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(APPDIR)/external/system/codec/fdk-aac/libSYS/include}
+    EXXFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(APPDIR)/external/system/codec/fdk-aac/libMpegTPDec/include}
+    EXXFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(APPDIR)/external/system/codec/fdk-aac/libSBRdec/include}
+    EXXFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(APPDIR)/external/system/codec/fdk-aac/libPCMutils/include}
+endif
+
+ifeq ($(CONFIG_CODEC_BLUEDROID),y)
+    EFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(APPDIR)/external/system/codec/bluedroid/decoder/include}
 endif
 
 CFLAGS   += $(EFLAGS)
-CXXFLAGS += $(EFLAGS)
+CXXFLAGS += $(EFLAGS) $(EXXFLAGS)

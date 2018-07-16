@@ -37,6 +37,14 @@
 EFLAGS =
 EXXFLAGS =
 
+ifeq ($(CONFIG_BT_HOST),y)
+    EFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(APPDIR)/external/system/bt/host/src/classic}
+    EFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(APPDIR)/external/system/bt/host/src/ble}
+    EFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(APPDIR)/external/system/bt/host/src}
+    EFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(APPDIR)/external/system/bt/host/platform/song}
+    EFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(APPDIR)/external/system/bt/host/port/song}
+endif
+
 ifeq ($(CONFIG_CMSIS),y)
     EFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(APPDIR)/external/system/cmsis/CMSIS/Core/Include}
     EFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(APPDIR)/external/system/cmsis/CMSIS/DSP/Include}

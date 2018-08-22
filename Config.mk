@@ -37,6 +37,10 @@
 EFLAGS =
 EXXFLAGS =
 
+ifeq ($(CONFIG_FRAMEWORKS),y)
+    EFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(APPDIR)/external/frameworks/include}
+endif
+
 ifeq ($(CONFIG_BT_HOST),y)
     EFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(APPDIR)/external/system/bt/host/src/classic}
     EFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(APPDIR)/external/system/bt/host/src/ble}

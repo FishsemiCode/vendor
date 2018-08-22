@@ -1,6 +1,6 @@
 ############################################################################
-# apps/external/frameworks/Make.defs
-# Adds selected services to apps/ build
+# apps/external/frameworks/generic/Make.defs
+# Adds selected external to apps/ build
 #
 #   Copyright (C) 2018 Pinecone Inc. All rights reserved.
 #   Author: Pinecone <pinecone@pinecone.net>
@@ -34,6 +34,4 @@
 #
 ############################################################################
 
-ifeq ($(CONFIG_FRAMEWORKS),y)
-include $(wildcard $(APPDIR)/external/frameworks/*/Make.defs)
-endif
+CONFIGURED_APPS += external/frameworks/generic

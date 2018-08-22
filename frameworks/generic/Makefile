@@ -1,6 +1,5 @@
 ############################################################################
-# apps/external/frameworks/Make.defs
-# Adds selected services to apps/ build
+# apps/external/frameworks/generic/Makefile
 #
 #   Copyright (C) 2018 Pinecone Inc. All rights reserved.
 #   Author: Pinecone <pinecone@pinecone.net>
@@ -34,6 +33,14 @@
 #
 ############################################################################
 
-ifeq ($(CONFIG_FRAMEWORKS),y)
-include $(wildcard $(APPDIR)/external/frameworks/*/Make.defs)
-endif
+-include $(TOPDIR)/Make.defs
+
+VPATH += :generic
+
+ifneq ($(CONFIG_DISABLE_MQUEUE),y)
+
+CSRCS += message.c
+
+endif # CONFIG_DISABLE_MQUEUE
+
+include $(APPDIR)/Application.mk

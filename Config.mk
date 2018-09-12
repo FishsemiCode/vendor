@@ -37,11 +37,11 @@
 EFLAGS =
 EXXFLAGS =
 
-ifeq ($(CONFIG_FRAMEWORKS),y)
+ifneq ($(CONFIG_FRAMEWORKS),)
     EFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(APPDIR)/external/frameworks/include}
 endif
 
-ifeq ($(CONFIG_BT_HOST),y)
+ifneq ($(CONFIG_BT_HOST),)
     EFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(APPDIR)/external/system/bt/host/src/classic}
     EFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(APPDIR)/external/system/bt/host/src/ble}
     EFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(APPDIR)/external/system/bt/host/src}
@@ -49,7 +49,7 @@ ifeq ($(CONFIG_BT_HOST),y)
     EFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(APPDIR)/external/system/bt/host/port/song}
 endif
 
-ifeq ($(CONFIG_CMSIS),y)
+ifneq ($(CONFIG_CMSIS),)
     EFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(APPDIR)/external/system/cmsis/CMSIS/Core/Include}
     EFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(APPDIR)/external/system/cmsis/CMSIS/DSP/Include}
 
@@ -70,19 +70,19 @@ ifeq ($(CONFIG_CMSIS),y)
   endif
 endif
 
-ifeq ($(CONFIG_NETUTILS_LIBCOAP),y)
+ifneq ($(CONFIG_NETUTILS_LIBCOAP),)
     EFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(APPDIR)/external/system/libcoap/include}
 endif
 
-ifeq ($(CONFIG_CODEC_HELIXAAC),y)
+ifneq ($(CONFIG_CODEC_HELIXAAC),)
     EFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(APPDIR)/external/system/codec/libhelix-aac}
 endif
 
-ifeq ($(CONFIG_CODEC_FAAD2),y)
+ifneq ($(CONFIG_CODEC_FAAD2),)
     EFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(APPDIR)/external/system/codec/faad2/include}
 endif
 
-ifeq ($(CONFIG_CODEC_FDKAAC),y)
+ifneq ($(CONFIG_CODEC_FDKAAC),)
     EXXFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(APPDIR)/external/system/codec/fdk-aac/libAACdec/include}
     EXXFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(APPDIR)/external/system/codec/fdk-aac/libFDK/include}
     EXXFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(APPDIR)/external/system/codec/fdk-aac/libSYS/include}
@@ -91,7 +91,7 @@ ifeq ($(CONFIG_CODEC_FDKAAC),y)
     EXXFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(APPDIR)/external/system/codec/fdk-aac/libPCMutils/include}
 endif
 
-ifeq ($(CONFIG_CODEC_BLUEDROID),y)
+ifneq ($(CONFIG_CODEC_BLUEDROID),)
     EFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(APPDIR)/external/system/codec/bluedroid/decoder/include}
 endif
 

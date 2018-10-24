@@ -41,6 +41,10 @@ ifneq ($(CONFIG_DISABLE_MQUEUE),y)
 
 CSRCS += message.c
 
+ifeq ($(CONFIG_DEV_GPIO),y)
+CSRCS += gpio.c
+endif
+
 endif # CONFIG_DISABLE_MQUEUE
 
 include $(APPDIR)/Application.mk

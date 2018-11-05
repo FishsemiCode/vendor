@@ -41,6 +41,10 @@ ifneq ($(CONFIG_FRAMEWORKS),)
     EFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(APPDIR)/external/frameworks/include}
 endif
 
+ifeq ($(CONFIG_BT_CONTROLLER),y)
+    EFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(APPDIR)/external/system/bt/controller/plf/song/src/arch/main}
+endif
+
 ifneq ($(CONFIG_BT_HOST),)
     EFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(APPDIR)/external/system/bt/host/src/classic}
     EFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(APPDIR)/external/system/bt/host/src/ble}

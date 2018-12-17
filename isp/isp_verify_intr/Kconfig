@@ -1,0 +1,26 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config ISP_VERIFY_INTR
+    bool "isp verify intr"
+    default n
+    ---help---
+        Enable the api isp verify intr
+
+if ISP_VERIFY_INTR
+
+config ISP_VERIFY_INTR_PROGNAME
+    string "Program name"
+    default "isp_verify_intr"
+
+config ISP_VERIFY_INTR_PRIORITY
+    int "isp verify intr task priority"
+    default 100
+
+config ISP_VERIFY_INTR_STACKSIZE
+    int "isp verify intr stack size"
+    default 2048
+
+endif

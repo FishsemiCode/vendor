@@ -1,0 +1,26 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config ISP_HELLO
+    bool "isp hello"
+    default n
+    ---help---
+        Enable the api gpio example
+
+if ISP_HELLO
+
+config ISP_HELLO_PROGNAME
+    string "Program name"
+    default "isp_hello"
+
+config ISP_HELLO_PRIORITY
+    int "isp hello task priority"
+    default 100
+
+config ISP_HELLO_STACKSIZE
+    int "isp hello stack size"
+    default 2048
+
+endif

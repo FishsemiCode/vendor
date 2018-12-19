@@ -44,20 +44,21 @@
 #include <syslog.h>
 
 #include "nuttx/irq.h"
+#include "nuttx/arch.h"
 #include "isp_irq_def.h"
 
-#define setreg32(addr, val)		(*(volatile uint32_t *)(addr) = (val))
+#define setreg32(addr, val)		(*(volatile uint32_t *)(addr) = (uint32_t)(val))
 #define getreg32(addr)			(*(volatile uint32_t *)(addr))
-#define setreg16(addr, val)		(*(volatile uint16_t *)(addr) = (val))
+#define setreg16(addr, val)		(*(volatile uint16_t *)(addr) = (uint16_t)(val))
 #define getreg16(addr)			(*(volatile uint16_t *)(addr))
-#define setreg8(addr, val)		(*(volatile uint8_t *)(addr) = (val))
+#define setreg8(addr, val)		(*(volatile uint8_t *)(addr) = (uint8_t)(val))
 #define getreg8(addr)			(*(volatile uint8_t *)(addr))
 
 #define set_bit(n, bit, x)	(n = (n & ~(1 << bit)) | ((x << bit)))
 
 unsigned int g_isp1_irq;
 
-int isp_isr(uint32_t irq, void *data, void *arg)
+int isp_isr(int irq, void *data, void *arg)
 {
 	int addr, val;
 	{
@@ -68,24 +69,24 @@ int isp_isr(uint32_t irq, void *data, void *arg)
 	}
 	return 0;
 }
-static void mapping_irqs()
+static void mapping_irqs(void)
 {
 	irq_attach(ISP1_IRQ, isp_isr, NULL);
 	up_enable_irq(ISP1_IRQ);
 }
 
-static int init_irqs()
+static int init_irqs(void)
 {
 	mapping_irqs();
 	setreg32(ISP1_BASE + INT_SOF_EOF_EN, ((1 << BIT_EOF) | (1 << BIT_SOF)));
 	return 0;
 }
 
-static int start_single_stream()
+static int start_single_stream(void)
 {
-	unsigned int *y_addr = 0x80000000;
-	unsigned int *u_addr = 0x80200000;
-	unsigned int *v_addr = 0x80400000;
+	unsigned int *y_addr = (unsigned int *)0x80000000;
+	unsigned int *u_addr = (unsigned int *)0x80200000;
+	unsigned int *v_addr = (unsigned int *)0x80400000;
 
 	setreg32(ISP1_BASE + REG_ISP_WIDTH, 176);
 	setreg32(ISP1_BASE + REG_ISP_HEIGHT, 144);
@@ -115,7 +116,7 @@ static int start_single_stream()
 
 }
 
-void isp_irq_listener_thread(void *arg)
+void *isp_irq_listener_thread(void *arg)
 {
 	while (1) {
 		if (g_isp1_irq & 0x2) {
@@ -132,7 +133,7 @@ void isp_irq_listener_thread(void *arg)
 
 }
 
-void isp_main_loop(void *arg)
+void *isp_main_loop(void *arg)
 {
 	while (1) {
 		usleep(1);

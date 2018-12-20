@@ -37,18 +37,14 @@
 #ifndef ISP_IRQ_DEF
 #define ISP_IRQ_DEF
 
-#define ISP1_IRQ 0
-#define ISP2_IRQ 1
-#define ISP3_IRQ 2
-#define ISP4_IRQ 3
-
 #define ISP1_BASE 0xFA450000
 #define ISP2_BASE 0xFA451000
 #define ISP3_BASE 0xFA452000
 #define ISP4_BASE 0xFA453000
+#define ISP_BASE_OFFSET	0x1000
 
 #define INT_SOF_EOF_EN	0xa00
-#define ING_SOF_EOF		0xa04
+#define INT_SOF_EOF		0xa04
 	#define BIT_EOF		1
 	#define BIT_SOF		0
 

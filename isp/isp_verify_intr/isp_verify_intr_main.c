@@ -55,30 +55,81 @@
 #define getreg8(addr)			(*(volatile uint8_t *)(addr))
 
 #define set_bit(n, bit, x)	(n = (n & ~(1 << bit)) | ((x << bit)))
+int isp_isr_process(int irq, void *data, void *arg);
+int isp1_isr(int irq, void *data, void *arg);
+int isp2_isr(int irq, void *data, void *arg);
+int isp3_isr(int irq, void *data, void *arg);
+int isp4_isr(int irq, void *data, void *arg);
 
-unsigned int g_isp1_irq;
+typedef enum {
+	ISP1_IRQ = 0,
+	ISP2_IRQ,
+	ISP3_IRQ,
+	ISP4_IRQ
+} irq_id_t;
 
-int isp_isr(int irq, void *data, void *arg)
+irq_id_t irq_id_array[] = {
+	ISP1_IRQ,
+	ISP2_IRQ,
+	ISP3_IRQ,
+	ISP4_IRQ
+};
+
+static int (*isp_isr[4])(int, void *, void *) = {
+	isp1_isr,
+	isp2_isr,
+	isp3_isr,
+	isp4_isr,
+};
+
+
+unsigned int g_frame_irq[4];
+
+int isp_isr_process(int irq, void *data,  void *arg)
 {
 	int addr, val;
-	{
-		addr = ISP1_BASE + ING_SOF_EOF;
+	switch (irq) {
+	case 0:
+	case 1:
+	case 2:
+	case 3:
+		addr = ISP1_BASE + irq * ISP_BASE_OFFSET + INT_SOF_EOF;
 		val = getreg32(addr);
-		g_isp1_irq |= val;
+		g_frame_irq[irq] |= val;
 		setreg32(addr, val & 0x3);
+		break;
+	default:
+		break;
 	}
 	return 0;
 }
-static void mapping_irqs(void)
+
+int isp1_isr(int irq, void *data, void *arg)
 {
-	irq_attach(ISP1_IRQ, isp_isr, NULL);
-	up_enable_irq(ISP1_IRQ);
+	return isp_isr_process(irq, data, arg);
+}
+int isp2_isr(int irq, void *data, void *arg)
+{
+	return isp_isr_process(irq, data, arg);
+}
+int isp3_isr(int irq, void *data, void *arg)
+{
+	return isp_isr_process(irq, data, arg);
+}
+int isp4_isr(int irq, void *data, void *arg)
+{
+	return isp_isr_process(irq, data, arg);
 }
 
 static int init_irqs(void)
 {
-	mapping_irqs();
-	setreg32(ISP1_BASE + INT_SOF_EOF_EN, ((1 << BIT_EOF) | (1 << BIT_SOF)));
+	int i = 0;
+	int irq_num = sizeof(irq_id_array) / sizeof(irq_id_array[0]);
+	for (i = 0; i < irq_num; i++) {
+		irq_attach(irq_id_array[i], isp_isr[i], NULL);
+		up_enable_irq(irq_id_array[i]);
+		setreg32(ISP1_BASE + i* ISP_BASE_OFFSET + INT_SOF_EOF_EN, ((1 << BIT_EOF) | (1 << BIT_SOF)));
+	}
 	return 0;
 }
 
@@ -88,29 +139,29 @@ static int start_single_stream(void)
 	unsigned int *u_addr = (unsigned int *)0x80200000;
 	unsigned int *v_addr = (unsigned int *)0x80400000;
 
-	setreg32(ISP1_BASE + REG_ISP_WIDTH, 176);
-	setreg32(ISP1_BASE + REG_ISP_HEIGHT, 144);
-	setreg32(ISP1_BASE + REG_AWB_STAT_WIDTH, 176);
-	setreg32(ISP1_BASE + REG_AWB_STAT_HEIGHT, 144);
-	setreg32(ISP1_BASE + REG_AE_STAT_WIDTH, 176);
-	setreg32(ISP1_BASE + REG_AE_STAT_HEIGHT, 144);
-	setreg32(ISP1_BASE + REG_PORT0_WIDTH, 176);
-	setreg32(ISP1_BASE + REG_PORT0_HEIGHT, 144);
-	setreg32(ISP1_BASE + REG_PORT1_WIDTH, 176);
-	setreg32(ISP1_BASE + REG_PORT1_HEIGHT, 144);
-	setreg32(ISP1_BASE + REG_PORT2_WIDTH, 176);
-	setreg32(ISP1_BASE + REG_PORT2_HEIGHT, 144);
-	setreg32(ISP1_BASE + REG_PORT3_WIDTH, 176);
-	setreg32(ISP1_BASE + REG_PORT3_HEIGHT, 144);
-	setreg32(ISP1_BASE + REG_RD_PORT_WIDTH, 176);
-	setreg32(ISP1_BASE + REG_RD_PORT_HEIGHT, 144);
-	setreg32(ISP1_BASE + REG_RD_PORT_VB, 0x100);
+	setreg32(ISP4_BASE + REG_ISP_WIDTH, 176);
+	setreg32(ISP4_BASE + REG_ISP_HEIGHT, 144);
+	setreg32(ISP4_BASE + REG_AWB_STAT_WIDTH, 176);
+	setreg32(ISP4_BASE + REG_AWB_STAT_HEIGHT, 144);
+	setreg32(ISP4_BASE + REG_AE_STAT_WIDTH, 176);
+	setreg32(ISP4_BASE + REG_AE_STAT_HEIGHT, 144);
+	setreg32(ISP4_BASE + REG_PORT0_WIDTH, 176);
+	setreg32(ISP4_BASE + REG_PORT0_HEIGHT, 144);
+	setreg32(ISP4_BASE + REG_PORT1_WIDTH, 176);
+	setreg32(ISP4_BASE + REG_PORT1_HEIGHT, 144);
+	setreg32(ISP4_BASE + REG_PORT2_WIDTH, 176);
+	setreg32(ISP4_BASE + REG_PORT2_HEIGHT, 144);
+	setreg32(ISP4_BASE + REG_PORT3_WIDTH, 176);
+	setreg32(ISP4_BASE + REG_PORT3_HEIGHT, 144);
+	setreg32(ISP4_BASE + REG_RD_PORT_WIDTH, 176);
+	setreg32(ISP4_BASE + REG_RD_PORT_HEIGHT, 144);
+	setreg32(ISP4_BASE + REG_RD_PORT_VB, 0x100);
 
-	setreg32(0xfa450010, 0x08);
-	setreg32(0xfa450800, 0x07);
-	setreg32(0xfa450860, y_addr);
-	setreg32(0xfa450864, u_addr);
-	setreg32(0xfa450868, v_addr);
+	setreg32(0xfa453010, 0x08);
+	setreg32(0xfa453800, 0x07);
+	setreg32(0xfa453860, y_addr);
+	setreg32(0xfa453864, u_addr);
+	setreg32(0xfa453868, v_addr);
 
 	return 0;
 
@@ -118,14 +169,17 @@ static int start_single_stream(void)
 
 void *isp_irq_listener_thread(void *arg)
 {
+	int i = 0;
 	while (1) {
-		if (g_isp1_irq & 0x2) {
-			syslog(LOG_INFO, "get eof!\n");
-			set_bit(g_isp1_irq, 1, 0);
-		}
-		if (g_isp1_irq & 0x1) {
-			syslog(LOG_INFO, "get sof!\n");
-			set_bit(g_isp1_irq, 0, 0);
+		for (i = 0; i < 4; i++) {
+			if (g_frame_irq[i] & 0x2) {
+				syslog(LOG_INFO, "get eof of pipeline %d!\n", i);
+				set_bit(g_frame_irq[i], 1, 0);
+			}
+			if (g_frame_irq[i] & 0x1) {
+				syslog(LOG_INFO, "get sof of pipeline %d!\n", i);
+				set_bit(g_frame_irq[i], 0, 0);
+			}
 		}
 
 		usleep(1);

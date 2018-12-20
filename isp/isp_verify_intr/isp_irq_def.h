@@ -47,6 +47,10 @@
 #define INT_SOF_EOF		0xa04
 	#define BIT_EOF		1
 	#define BIT_SOF		0
+#define INT_STAT_DONE_EN	0xa18
+#define INT_STAT_DONE		0xa1c
+	#define BIT_AE_DONE		1
+	#define BIT_AWB_DONE	0
 
 #define REG_ISP_HEIGHT	0x08
 #define REG_ISP_WIDTH	0x0c

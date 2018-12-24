@@ -60,40 +60,44 @@ int isp1_isr(int irq, void *data, void *arg);
 int isp2_isr(int irq, void *data, void *arg);
 int isp3_isr(int irq, void *data, void *arg);
 int isp4_isr(int irq, void *data, void *arg);
+int ispctl_isr(int irq, void *data, void *arg);
 
 typedef enum {
 	ISP1_IRQ = 0,
 	ISP2_IRQ,
 	ISP3_IRQ,
-	ISP4_IRQ
+	ISP4_IRQ,
+	ISPCTL_IRQ = 27
 } irq_id_t;
 
 irq_id_t irq_id_array[] = {
 	ISP1_IRQ,
 	ISP2_IRQ,
 	ISP3_IRQ,
-	ISP4_IRQ
+	ISP4_IRQ,
+	ISPCTL_IRQ
 };
 
-static int (*isp_isr[4])(int, void *, void *) = {
+static int (*isp_isr[])(int, void *, void *) = {
 	isp1_isr,
 	isp2_isr,
 	isp3_isr,
 	isp4_isr,
+	ispctl_isr,
 };
-
 
 unsigned int g_frame_irq[4];
 unsigned int g_stat_irq[4];
+unsigned int g_ispctl_irq;
 
 int isp_isr_process(int irq, void *data,  void *arg)
 {
 	int addr, val;
 	switch (irq) {
-	case 0:
-	case 1:
-	case 2:
-	case 3:
+	case ISP1_IRQ:
+	case ISP2_IRQ:
+	case ISP3_IRQ:
+	case ISP4_IRQ:
 		addr = ISP1_BASE + irq * ISP_BASE_OFFSET + INT_SOF_EOF;
 		val = getreg32(addr);
 		g_frame_irq[irq] |= val;
@@ -103,8 +107,15 @@ int isp_isr_process(int irq, void *data,  void *arg)
 		val = getreg32(addr);
 		g_stat_irq[irq] |= val;
 		setreg32(addr, val & 0x3);
-
 		break;
+
+	case ISPCTL_IRQ:
+		addr = INT_ISPCTL;
+		val = getreg32(addr);
+		g_ispctl_irq |= val;
+		setreg32(addr, val); // the set value should be 'val', but some logic in ispctl is wrong for now
+		break;
+
 	default:
 		break;
 	}
@@ -127,6 +138,10 @@ int isp4_isr(int irq, void *data, void *arg)
 {
 	return isp_isr_process(irq, data, arg);
 }
+int ispctl_isr(int irq, void *data, void *arg)
+{
+	return isp_isr_process(irq, data, arg);
+}
 
 static int init_irqs(void)
 {
@@ -135,8 +150,11 @@ static int init_irqs(void)
 	for (i = 0; i < irq_num; i++) {
 		irq_attach(irq_id_array[i], isp_isr[i], NULL);
 		up_enable_irq(irq_id_array[i]);
-		setreg32(ISP1_BASE + i* ISP_BASE_OFFSET + INT_SOF_EOF_EN, ((1 << BIT_EOF) | (1 << BIT_SOF)));
-		setreg32(ISP1_BASE + i* ISP_BASE_OFFSET + INT_STAT_DONE_EN, ((1 << BIT_AE_DONE) | (1 << BIT_AWB_DONE)));
+		syslog(LOG_INFO, "enable irq id = %d\n", irq_id_array[i]);
+		if ((i >= ISP1_IRQ) && (i <= ISP4_IRQ)) {
+			setreg32(ISP1_BASE + i* ISP_BASE_OFFSET + INT_SOF_EOF_EN, ((1 << BIT_EOF) | (1 << BIT_SOF)));
+			setreg32(ISP1_BASE + i* ISP_BASE_OFFSET + INT_STAT_DONE_EN, ((1 << BIT_AE_DONE) | (1 << BIT_AWB_DONE)));
+		}
 	}
 	return 0;
 }
@@ -174,6 +192,10 @@ static int start_single_stream(void)
 	setreg32(0xfa450864, u_addr);
 	setreg32(0xfa450868, v_addr);
 
+	/* enable isp ctl irq here */
+	setreg32(INT_ISPCTL_EN, 0x01);
+	setreg32(INT_ISPCTL_BIT_EN, 0xffff); // the set value should be 2<<INT_ISPCTL_EN, according to which int was needed, for test, enable all the intr bits
+
 	return 0;
 
 }
@@ -184,22 +206,27 @@ void *isp_irq_listener_thread(void *arg)
 	while (1) {
 		for (i = 0; i < 4; i++) {
 			if (g_frame_irq[i] & 0x2) {
-				syslog(LOG_INFO, "get eof of pipeline %d!\n", i);
+	//			syslog(LOG_INFO, "get eof of pipeline %d!\n", i);
 				set_bit(g_frame_irq[i], 1, 0);
 			}
 			if (g_frame_irq[i] & 0x1) {
-				syslog(LOG_INFO, "get sof of pipeline %d!\n", i);
+	//			syslog(LOG_INFO, "get sof of pipeline %d!\n", i);
 				set_bit(g_frame_irq[i], 0, 0);
 			}
 			if (g_stat_irq[i] & 0x1) {
-				syslog(LOG_INFO, "get awb done of pipeline %d!\n", i);
+	//			syslog(LOG_INFO, "get awb done of pipeline %d!\n", i);
 				set_bit(g_stat_irq[i], 0, 0);
 			}
 			if (g_stat_irq[i] & 0x2) {
-				syslog(LOG_INFO, "get ae done of pipeline %d!\n", i);
+	//			syslog(LOG_INFO, "get ae done of pipeline %d!\n", i);
 				set_bit(g_stat_irq[i], 1, 0);
 			}
 
+		}
+
+		if (g_ispctl_irq & 0xffff) {
+			syslog(LOG_INFO, "get isp ctl irq = 0x%x\n", g_ispctl_irq & 0xffff);
+			g_ispctl_irq = 0;
 		}
 
 		usleep(1);

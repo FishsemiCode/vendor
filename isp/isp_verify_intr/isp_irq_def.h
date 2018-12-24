@@ -37,6 +37,28 @@
 #ifndef ISP_IRQ_DEF
 #define ISP_IRQ_DEF
 
+#define INT_ISPCTL_EN	0xfa3e0404
+#define INT_ISPCTL_BIT_EN	0xfa3e0408
+#define INT_ISPCTL		0xfa3e040c
+#define REG_ISPCTL_TRIGGER	0xfa3e0400
+	#define ISPCTL_BIT_0	0
+	#define ISPCTL_BIT_1	1
+	#define ISPCTL_BIT_2	2
+	#define ISPCTL_BIT_3	3
+	#define ISPCTL_BIT_4	4
+	#define ISPCTL_BIT_5	5
+	#define ISPCTL_BIT_6	6
+	#define ISPCTL_BIT_7	7
+	#define ISPCTL_BIT_8	8
+	#define ISPCTL_BIT_9	9
+	#define ISPCTL_BIT_10	10
+	#define ISPCTL_BIT_11	11
+	#define ISPCTL_BIT_12	12
+	#define ISPCTL_BIT_13	13
+	#define ISPCTL_BIT_14	14
+	#define ISPCTL_BIT_15	15
+
+
 #define ISP1_BASE 0xFA450000
 #define ISP2_BASE 0xFA451000
 #define ISP3_BASE 0xFA452000

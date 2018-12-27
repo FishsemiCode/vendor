@@ -1,0 +1,26 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config ISP_SIMPLE_HOST
+    bool "isp simple host"
+    default n
+    ---help---
+        Enable the api isp simple host
+
+if ISP_SIMPLE_HOST
+
+config ISP_SIMPLE_HOST_PROGNAME
+    string "Program name"
+    default "isp_simple_host"
+
+config ISP_SIMPLE_HOST_PRIORITY
+    int "isp simple host task priority"
+    default 100
+
+config ISP_SIMPLE_HOST_STACKSIZE
+    int "isp simple host stack size"
+    default 2048
+
+endif

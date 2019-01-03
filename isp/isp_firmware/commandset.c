@@ -60,7 +60,7 @@ int set_format(stream_fmt_t *fmt)
 		/* stream on case */
 
 		/* set isp soft rst */
-		setreg32(ISP1_BASE + pipe_index * ISP_BASE_OFFSET + REG_SOFT_RSTN, 1);
+		setreg32(ISP1_BASE + pipe_index * ISP_BASE_OFFSET + REG_SOFT_RSTN, 0);
 
 		if (fmt->input_type == SRC_COLORBAR) {
 			setreg32(ISP1_BASE + pipe_index * ISP_BASE_OFFSET + REG_ISP_COLORBAR, 0x08);
@@ -91,6 +91,7 @@ int set_format(stream_fmt_t *fmt)
 				setreg32_mask(ISP1_BASE + pipe_index * ISP_BASE_OFFSET + REG_PORT0_CTRL + port_index * PORT_OFFSET, 0x00, 0x07);
 			}
 		}
+		setreg32(ISP1_BASE + pipe_index * ISP_BASE_OFFSET + REG_SOFT_RSTN, 1);
 
 	} else {
 		/* stream off case */

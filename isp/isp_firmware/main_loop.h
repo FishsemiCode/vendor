@@ -37,6 +37,11 @@
 #ifndef MAIN_LOOP_H
 #define MAIN_LOOP_H
 
+#include "defines.h"
+
+extern global_control_t *global_control[PIPE_NUM];
+extern middle_group_t *middle_group[PIPE_NUM];
+
 void *isp_main_loop(void *arg);
 
 #endif

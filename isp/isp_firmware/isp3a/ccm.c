@@ -1,5 +1,5 @@
 /****************************************************************************
- * apps/external/isp/isp_firmware/main_loop.c
+ * apps/external/isp/isp_firmware/isp3a/ccm.c
  *
  *   Copyright (C) 2008, 2011-2012 Gregory Nutt. All rights reserved.
  *   Author: Pinecone <pinecone@pinecone.net>
@@ -38,81 +38,65 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <syslog.h>
+#include <math.h>
 
-#include "nuttx/irq.h"
 #include "defines.h"
 #include "main_loop.h"
-#include "intr.h"
 #include "isp3a/isp3a.h"
 
-global_control_t *global_control[PIPE_NUM] = {
-	[0] = (global_control_t *)(FW_ISP_SETTING_BASE + 0 * FW_ISP_SETTING_OFFSET),
-	[1] = (global_control_t *)(FW_ISP_SETTING_BASE + 1 * FW_ISP_SETTING_OFFSET),
-	[2] = (global_control_t *)(FW_ISP_SETTING_BASE + 2 * FW_ISP_SETTING_OFFSET),
-	[3] = (global_control_t *)(FW_ISP_SETTING_BASE + 3 * FW_ISP_SETTING_OFFSET),
-};
-
-middle_group_t *middle_group[PIPE_NUM];
-
-int sof_process(int pipe_id)
+int ccm_process(int pipe_id)
 {
-	syslog(LOG_INFO, "%s for pipeline %d\n", __func__, pipe_id);
-	return 0;
-}
+	int i = 0, m1, m2, m3, n1, n2, n3;
+	int16_t cc[9], cc_boost[9];
+	uint16_t ct = middle_group[pipe_id]->current_ct;
+	uint16_t ct_0 = global_control[pipe_id]->cc_ct_th_0;
+	uint16_t ct_1 = global_control[pipe_id]->cc_ct_th_1;
+	uint16_t ct_2 = global_control[pipe_id]->cc_ct_th_2;
+	uint16_t level_0 = global_control[pipe_id]->cc_level_0;
+	uint16_t level_1 = global_control[pipe_id]->cc_level_1;
+	uint16_t level = 0;
+	uint32_t bri_0 = global_control[pipe_id]->cc_bri_th0;
+	uint32_t bri_1 = global_control[pipe_id]->cc_bri_th1;
+	int16_t *cc0 = global_control[pipe_id]->cc_coef[0];
+	int16_t *cc1 = global_control[pipe_id]->cc_coef[1];
+	int16_t *cc2 = global_control[pipe_id]->cc_coef[2];
 
-int eof_process(int pipe_id)
-{
-	syslog(LOG_INFO, "%s for pipeline %d\n", __func__, pipe_id);
-//	lenc_apply_process(pipe_id);
-	ccm_process(pipe_id);
-	gamma_process(pipe_id);
-	return 0;
-}
-
-int awb_done_process(int pipe_id)
-{
-	syslog(LOG_INFO, "%s for pipeline %d\n", __func__, pipe_id);
-	awb_read_process(pipe_id);
-//	awb_calc_process(pipe_id);
-	return 0;
-}
-
-int ae_done_process(int pipe_id)
-{
-	syslog(LOG_INFO, "%s for pipeline %d\n", __func__, pipe_id);
-	aecgc_read_process(pipe_id);
-	aecgc_calc_process(pipe_id);
-	return 0;
-}
-
-void *isp_main_loop(void *arg)
-{
-	int pipe_id = 0;
-	while (1) {
-		sem_wait(&sem_mainloop);
-		for (pipe_id = 0; pipe_id < PIPE_NUM; pipe_id++) {
-			if (g_sof[pipe_id] == 1) {
-				g_sof[pipe_id] = 0;
-				sof_process(pipe_id);
-			}
-
-			if (g_eof[pipe_id] == 1) {
-				g_eof[pipe_id] = 0;
-				eof_process(pipe_id);
-			}
-
-			if (g_awb_done[pipe_id] == 1) {
-				g_awb_done[pipe_id] = 0;
-				awb_done_process(pipe_id);
-			}
-
-			if (g_ae_done[pipe_id] == 1) {
-				g_ae_done[pipe_id] = 0;
-				ae_done_process(pipe_id);
-			}
+	for (i = 0; i < 9; i++) {
+		if (ct < ct_0) {
+			cc[i] = cc0[i];
+		} else if (ct < ct_1) {
+			cc[i] = interp(ct, ct_0, ct_1, cc0[i], cc1[i]);
+		} else if (ct < ct_2) {
+			cc[i] = interp(ct, ct_1, ct_2, cc1[i], cc2[i]);
+		} else {
+			cc[i] = cc2[i];
 		}
 	}
 
+	if (middle_group[pipe_id]->exp_idx < bri_0)
+		level = level_0;
+	else if (middle_group[pipe_id]->exp_idx < bri_1)
+		level = interp(middle_group[pipe_id]->exp_idx, bri_0, bri_1, level_0, level_1);
+	else
+		level = level_1;
+
+	for (i = 0; i < 9; i++) {
+		m1 = (i < 3) ? (384 + 640 * level / 0x80) :
+			((640 - 640 * level / 0x80) / 2);
+		m2 = ((i >= 3) && (i < 6)) ? (384 + 640 * level / 0x80) :
+			((640 - 640 * level / 0x80) / 2);
+		m3 = ((i >= 6)) ? (384 + 640 * level / 0x80) :
+			((640 - 640 * level / 0x80) / 2);
+		n1 = cc[i%3];
+		n2 = cc[(i%3) + 3];
+		n3 = cc[(i%3) + 6];
+
+		cc_boost[i] = (m1 * n1 + m2 * n2 + m3 * n3) / 1024;
+	}
+
+	/* apply cc to hardware */
+	for (i = 0; i < 9; i++) {
+		setreg32(ISP1_BASE + ISP_BASE_OFFSET * pipe_id + REG_CC_00 + 4*i, cc_boost[i]);
+	}
+	return 0;
 }
-
-

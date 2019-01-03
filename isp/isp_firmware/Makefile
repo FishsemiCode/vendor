@@ -52,6 +52,13 @@ CSRCS = \
 		main_loop.c \
 		commandset.c \
 
+CSRCS += \
+		 isp3a/awb.c \
+		 isp3a/lenc.c \
+		 isp3a/aecgc.c \
+		 isp3a/ccm.c \
+		 isp3a/tonemapping.c \
+
 ifeq ($(CONFIG_ISP_SIMPLE_HOST),y)
 CSRCS += simple_host/command_listener.c
 else

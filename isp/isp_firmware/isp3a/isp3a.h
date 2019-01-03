@@ -1,5 +1,5 @@
 /****************************************************************************
- * apps/external/isp/isp_firmware/commandset.h
+ * apps/external/isp/isp_firmware/iap3a/isp3a.h
  *
  *   Copyright (C) 2008, 2011-2012 Gregory Nutt. All rights reserved.
  *   Author: Pinecone <pinecone@pinecone.net>
@@ -34,13 +34,24 @@
  *
  ****************************************************************************/
 
-#ifndef COMMANDSET_H
-#define COMMANDSET_H
+#ifndef ISP3A_H
+#define ISP3A_H
 
 #include "defines.h"
 
-int initialize(void);
-int deinit(void);
-int set_format(stream_fmt_t *fmt);
+int awb_read_process(int pipe_id);
+int awb_calc_process(int pipe_id);
+int awb_apply_process(int pipe_id);
+
+int lenc_read_process(int pipe_id);
+int lenc_calc_process(int pipe_id);
+int lenc_apply_process(int pipe_id);
+
+int aecgc_read_process(int pipe_id);
+int aecgc_calc_process(int pipe_id);
+int aecgc_apply_process(int pipe_id);
+
+int ccm_process(int pipe_id);
+int gamma_process(int pipe_id);
 
 #endif

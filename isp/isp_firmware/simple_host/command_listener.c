@@ -62,6 +62,13 @@ void *command_lister(void *arg)
 			setreg32(REG_ISPCTL_TRIGGER, ISPCTL_INIT_FW_DONE);
 		}
 
+		if (g_ispctl_irq & (1 << ISPCTL_DEINIT_FW)) {
+			syslog(LOG_INFO, "get ispctl deinit fw\n");
+			deinit();
+			g_ispctl_irq = 0;
+			setreg32(REG_ISPCTL_TRIGGER, ISPCTL_DEINIT_FW_DONE);
+		}
+
 		if (g_ispctl_irq & (1 << ISPCTL_SETFMT)) {
 			syslog(LOG_INFO, "get set format cmd\n");
 			g_fmt = (stream_fmt_t *)FW_CMD_BUFFER_BASE;

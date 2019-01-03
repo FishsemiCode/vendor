@@ -44,10 +44,163 @@
 #include "intr.h"
 #include "nuttx/arch.h"
 #include "commandset.h"
+#include "main_loop.h"
+
+int initialize_hw(int pipe_id)
+{
+	setreg32(ISP1_BASE + pipe_id * ISP_BASE_OFFSET + REG_CC_EN, 1);
+	setreg32(ISP1_BASE + pipe_id * ISP_BASE_OFFSET + REG_GAMMA_EN, global_control[pipe_id]->gamma_en);
+
+	return 0;
+}
 
 int initialize(void)
 {
 	syslog(LOG_INFO, "%s\n", __func__);
+	int i = 0;
+
+	for (i = 0; i < PIPE_NUM; i++) {
+		middle_group[i] = (middle_group_t *)malloc(sizeof(middle_group_t));
+	}
+
+	for (i = 0; i <256; i++) {
+		global_control[0]->lsc_r_coef[i] = 255 - i;
+		global_control[0]->lsc_g_coef[i] = 255 - i;
+		global_control[0]->lsc_b_coef[i] = 255 - i;
+
+	}
+
+	for (i = 0; i < 16; i++) {
+		global_control[0]->ae_weight[i] = 0x10;
+	}
+
+	for (i = 0; i < 3; i++) {
+		global_control[0]->cc_coef[i][0] = 0x100;
+		global_control[0]->cc_coef[i][1] = 0;
+		global_control[0]->cc_coef[i][2] = 0;
+		global_control[0]->cc_coef[i][3] = 0;
+		global_control[0]->cc_coef[i][4] = 0x100;
+		global_control[0]->cc_coef[i][5] = 0;
+		global_control[0]->cc_coef[i][6] = 0;
+		global_control[0]->cc_coef[i][7] = 0;
+		global_control[0]->cc_coef[i][8] = 0x100;
+	}
+
+	global_control[0]->gamma_en = 1;
+	i = 0;
+	global_control[0]->gamma_index[i++] = 0x004;
+	global_control[0]->gamma_index[i++] = 0x008;
+	global_control[0]->gamma_index[i++] = 0x00C;
+	global_control[0]->gamma_index[i++] = 0x010;
+	global_control[0]->gamma_index[i++] = 0x014;
+	global_control[0]->gamma_index[i++] = 0x018;
+	global_control[0]->gamma_index[i++] = 0x01C;
+	global_control[0]->gamma_index[i++] = 0x020;
+	global_control[0]->gamma_index[i++] = 0x024;
+	global_control[0]->gamma_index[i++] = 0x028;
+	global_control[0]->gamma_index[i++] = 0x02C;
+	global_control[0]->gamma_index[i++] = 0x030;
+	global_control[0]->gamma_index[i++] = 0x034;
+	global_control[0]->gamma_index[i++] = 0x038;
+	global_control[0]->gamma_index[i++] = 0x03C;
+	global_control[0]->gamma_index[i++] = 0x040;
+	global_control[0]->gamma_index[i++] = 0x060;
+	global_control[0]->gamma_index[i++] = 0x080;
+	global_control[0]->gamma_index[i++] = 0x0A0;
+	global_control[0]->gamma_index[i++] = 0x0C0;
+	global_control[0]->gamma_index[i++] = 0x0E0;
+	global_control[0]->gamma_index[i++] = 0x100;
+	global_control[0]->gamma_index[i++] = 0x120;
+	global_control[0]->gamma_index[i++] = 0x140;
+	global_control[0]->gamma_index[i++] = 0x160;
+	global_control[0]->gamma_index[i++] = 0x180;
+	global_control[0]->gamma_index[i++] = 0x1A0;
+	global_control[0]->gamma_index[i++] = 0x1C0;
+	global_control[0]->gamma_index[i++] = 0x1E0;
+	global_control[0]->gamma_index[i++] = 0x200;
+	global_control[0]->gamma_index[i++] = 0x220;
+	global_control[0]->gamma_index[i++] = 0x240;
+	global_control[0]->gamma_index[i++] = 0x260;
+	global_control[0]->gamma_index[i++] = 0x280;
+	global_control[0]->gamma_index[i++] = 0x2A0;
+	global_control[0]->gamma_index[i++] = 0x2C0;
+	global_control[0]->gamma_index[i++] = 0x2E0;
+	global_control[0]->gamma_index[i++] = 0x300;
+	global_control[0]->gamma_index[i++] = 0x320;
+	global_control[0]->gamma_index[i++] = 0x340;
+	global_control[0]->gamma_index[i++] = 0x360;
+	global_control[0]->gamma_index[i++] = 0x380;
+	global_control[0]->gamma_index[i++] = 0x3A0;
+	global_control[0]->gamma_index[i++] = 0x3C0;
+	global_control[0]->gamma_index[i++] = 0x3E0;
+	global_control[0]->gamma_index[i++] = 0x3FF;
+
+	i = 0;
+	global_control[0]->gamma_val_low[i++] = 0x00C;
+	global_control[0]->gamma_val_low[i++] = 0x018;
+	global_control[0]->gamma_val_low[i++] = 0x020;
+	global_control[0]->gamma_val_low[i++] = 0x02C;
+	global_control[0]->gamma_val_low[i++] = 0x038;
+	global_control[0]->gamma_val_low[i++] = 0x044;
+	global_control[0]->gamma_val_low[i++] = 0x04C;
+	global_control[0]->gamma_val_low[i++] = 0x058;
+	global_control[0]->gamma_val_low[i++] = 0x064;
+	global_control[0]->gamma_val_low[i++] = 0x070;
+	global_control[0]->gamma_val_low[i++] = 0x074;
+	global_control[0]->gamma_val_low[i++] = 0x080;
+	global_control[0]->gamma_val_low[i++] = 0x08C;
+	global_control[0]->gamma_val_low[i++] = 0x098;
+	global_control[0]->gamma_val_low[i++] = 0x0A0;
+	global_control[0]->gamma_val_low[i++] = 0x0AC;
+	global_control[0]->gamma_val_low[i++] = 0x110;
+	global_control[0]->gamma_val_low[i++] = 0x174;
+	global_control[0]->gamma_val_low[i++] = 0x1C4;
+	global_control[0]->gamma_val_low[i++] = 0x210;
+	global_control[0]->gamma_val_low[i++] = 0x24C;
+	global_control[0]->gamma_val_low[i++] = 0x278;
+	global_control[0]->gamma_val_low[i++] = 0x29C;
+	global_control[0]->gamma_val_low[i++] = 0x2BC;
+	global_control[0]->gamma_val_low[i++] = 0x2D8;
+	global_control[0]->gamma_val_low[i++] = 0x2F0;
+	global_control[0]->gamma_val_low[i++] = 0x308;
+	global_control[0]->gamma_val_low[i++] = 0x320;
+	global_control[0]->gamma_val_low[i++] = 0x334;
+	global_control[0]->gamma_val_low[i++] = 0x344;
+	global_control[0]->gamma_val_low[i++] = 0x354;
+	global_control[0]->gamma_val_low[i++] = 0x364;
+	global_control[0]->gamma_val_low[i++] = 0x370;
+	global_control[0]->gamma_val_low[i++] = 0x37C;
+	global_control[0]->gamma_val_low[i++] = 0x388;
+	global_control[0]->gamma_val_low[i++] = 0x394;
+	global_control[0]->gamma_val_low[i++] = 0x3A0;
+	global_control[0]->gamma_val_low[i++] = 0x3AC;
+	global_control[0]->gamma_val_low[i++] = 0x3B8;
+	global_control[0]->gamma_val_low[i++] = 0x3C0;
+	global_control[0]->gamma_val_low[i++] = 0x3CC;
+	global_control[0]->gamma_val_low[i++] = 0x3D8;
+	global_control[0]->gamma_val_low[i++] = 0x3E0;
+	global_control[0]->gamma_val_low[i++] = 0x3EC;
+	global_control[0]->gamma_val_low[i++] = 0x3F4;
+	global_control[0]->gamma_val_low[i++] = 0x3FF;
+	for (i = 0; i < 46; i++) {
+		global_control[0]->gamma_val_mid[i] = global_control[0]->gamma_val_low[i];
+		global_control[0]->gamma_val_high[i] = global_control[0]->gamma_val_low[i];
+	}
+
+	return 0;
+}
+
+int deinit(void)
+{
+	int i = 0;
+
+	for (i = 0; i < PIPE_NUM; i++) {
+		if (middle_group[i] != NULL) {
+			free(middle_group[i]);
+			middle_group[i] = NULL;
+		}
+	}
+
 	return 0;
 }
 
@@ -58,6 +211,8 @@ int set_format(stream_fmt_t *fmt)
 
 	if (fmt->str_on_off_flag == true) {
 		/* stream on case */
+		/* initialize hw according to pipe id */
+		initialize_hw(pipe_index);
 
 		/* set isp soft rst */
 		setreg32(ISP1_BASE + pipe_index * ISP_BASE_OFFSET + REG_SOFT_RSTN, 0);

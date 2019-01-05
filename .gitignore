@@ -12,7 +12,7 @@ core
 cscope.out
 /bootloader
 /example/headset
-/frameworks/bluetooth_manager
+/frameworks
 /system
 /services
 /tools

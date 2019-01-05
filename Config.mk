@@ -51,6 +51,7 @@ ifneq ($(CONFIG_BT_HOST),)
     EFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(APPDIR)/external/system/bt/host/src}
     EFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(APPDIR)/external/system/bt/host/platform/song}
     EFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(APPDIR)/external/system/bt/host/port/song}
+    EFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(APPDIR)/external/system/bt/host/chipset/song}
 endif
 
 ifneq ($(CONFIG_CMSIS),)

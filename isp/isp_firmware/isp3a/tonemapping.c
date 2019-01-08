@@ -42,7 +42,7 @@
 
 #include "defines.h"
 #include "main_loop.h"
-#include "isp3a/isp3a.h"
+#include "isp3a.h"
 
 /* note: the calc consumption of convert 46-seg curve to 1024-seg curve seems
  * a little large. For low resolution and high frame rate case, when gamma process

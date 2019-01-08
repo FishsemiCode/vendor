@@ -1,8 +1,10 @@
 ############################################################################
-# apps/external/isp/isp_firmware/Makefile
+# apps/external/isp/isp_firmware/sys/Make.defs
+# Adds selected applications to apps/ build
 #
-#   Copyright (C) 2008, 2010-2013 Gregory Nutt. All rights reserved.
-#   Author: Gregory Nutt <gnutt@nuttx.org>
+#   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+#   Author: Pinecone <pinecone@pinecone.net>
+
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -33,32 +35,11 @@
 #
 ############################################################################
 
--include $(TOPDIR)/Make.defs
+CSRCS += \
+		 commandset.c \
+		 intr.c \
+		 main_loop.c \
 
-# isp firmware built-in application info
+VPATH += :sys
 
-CONFIG_ISP_FIRMWARE_PRIORITY ?= SCHED_PRIORITY_DEFAULT
-CONFIG_ISP_FIRMWARE_STACKSIZE ?= 2048
-
-APPNAME = isp_firmware
-PRIORITY = $(CONFIG_ISP_FIRMWARE_PRIORITY)
-STACKSIZE = $(CONFIG_ISP_FIRMWARE_STACKSIZE)
-
-# ISP firmware
-
-MAINSRC = isp_firmware_main.c
-
-ASRCS =
-CSRCS =
-
-DEPPATH = --dep-path .
-
-include sys/Make.defs
-include isp3a/Make.defs
-ifeq ($(CONFIG_ISP_SIMPLE_HOST),y)
-include simple_host/Make.defs
-endif
-
-PROGNAME = $(CONFIG_ISP_FIRMWARE_PROGNAME)
-
-include $(APPDIR)/Application.mk
+CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(SRCDIR)/sys}

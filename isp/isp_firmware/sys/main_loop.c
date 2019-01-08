@@ -43,7 +43,7 @@
 #include "defines.h"
 #include "main_loop.h"
 #include "intr.h"
-#include "isp3a/isp3a.h"
+#include "isp3a.h"
 
 global_control_t *global_control[PIPE_NUM] = {
 	[0] = (global_control_t *)(FW_ISP_SETTING_BASE + 0 * FW_ISP_SETTING_OFFSET),

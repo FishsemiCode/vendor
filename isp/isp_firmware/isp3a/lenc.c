@@ -41,7 +41,7 @@
 
 #include "defines.h"
 #include "main_loop.h"
-#include "isp3a/isp3a.h"
+#include "isp3a.h"
 
 int lenc_read_process(int pipe_id)
 {

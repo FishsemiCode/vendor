@@ -49,7 +49,7 @@
 #include "main_loop.h"
 
 #ifdef CONFIG_ISP_SIMPLE_HOST
-#include "simple_host/command_listener.h"
+#include "command_listener.h"
 #endif //CONFIG_ISP_SIMPLE_HOST
 
 sem_t sem_cmd_listener, sem_irq_listener, sem_mainloop;

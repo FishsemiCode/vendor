@@ -104,5 +104,14 @@ ifneq ($(CONFIG_CODEC_BLUEDROID),)
     EFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(APPDIR)/external/system/codec/bluedroid/decoder/include}
 endif
 
+ifneq ($(CONFIG_ALSA_SOF),)
+  EFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" ${APPDIR}/external/system/sof/src/platform/nuttx/include}
+  EFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" ${APPDIR}/external/system/sof/src/include}
+endif
+
+ifneq ($(CONFIG_AUDIO_SERVICE),)
+  EFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" ${APPDIR}/external/services/audio/include}
+endif
+
 CFLAGS   += $(EFLAGS)
 CXXFLAGS += $(EFLAGS) $(EXXFLAGS)

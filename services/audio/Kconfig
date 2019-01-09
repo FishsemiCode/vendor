@@ -1,0 +1,20 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config AUDIO_SERVICE
+	tristate "Audio Service"
+	default n
+	---help---
+		Enable Audio Service.
+
+if AUDIO_SERVICE
+
+config AUDIO_DAEMON
+	bool "Enable AUDIO DAEMON"
+	default n
+	---help---
+		Enable Audio Daemon.
+
+endif # AUDIO_SERVICE

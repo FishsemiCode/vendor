@@ -52,4 +52,6 @@ MAINSRC = api_gpio_main.c
 
 PROGNAME = $(CONFIG_EXAMPLES_API_GPIO_PROGNAME)
 
+MODULE = CONFIG_EXAMPLES_API_GPIO
+
 include $(APPDIR)/Application.mk

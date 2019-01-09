@@ -4,7 +4,7 @@
 #
 
 config EXAMPLES_API_GPIO
-    bool "api gpio example"
+    tristate "api gpio example"
     default n
     depends on FRAMEWORKS
     depends on DEV_GPIO

@@ -76,8 +76,14 @@ static int message_handler(message_t *msg, uint16_t len)
   return MESSAGE_HANDLED;
 }
 
-static int api_gpio_task(int argc, char *argv[])
+#if defined(BUILD_MODULE)
+int main(int argc, FAR char *argv[])
+#else
+int api_gpio_main(int argc, char *argv[])
+#endif
 {
+  printf("api gpio test...\n");
+
   g_rcvr = message_init(message_handler, 0, 0);
   if (g_rcvr == NULL)
     return -1;
@@ -91,23 +97,4 @@ static int api_gpio_task(int argc, char *argv[])
   message_fini(g_rcvr);
 
   return 0;
-}
-
-#ifdef CONFIG_BUILD_KERNEL
-int main(int argc, FAR char *argv[])
-#else
-int api_gpio_main(int argc, char *argv[])
-#endif
-{
-  int ret;
-
-  printf("api gpio test...\n");
-
-  ret = task_create(argv[0],
-          CONFIG_EXAMPLES_API_GPIO_PRIORITY,
-          CONFIG_EXAMPLES_API_GPIO_STACKSIZE,
-          api_gpio_task,
-          argv + 1);
-
-  return ret > 0 ? 0 : ret;
 }

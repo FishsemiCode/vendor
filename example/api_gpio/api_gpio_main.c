@@ -56,7 +56,7 @@ static gpio_handle_t g_handle;
  * api_gpio_main
  ****************************************************************************/
 
-static void message_handler(message_t *msg, uint16_t len)
+static int message_handler(message_t *msg, uint16_t len)
 {
   msg_gpio_t *m = (msg_gpio_t *)msg;
   switch (m->id)
@@ -67,9 +67,13 @@ static void message_handler(message_t *msg, uint16_t len)
                   m->changed.pin, m->changed.state,
                   m->changed.time);
           break;
+      case MSG_EXIT_LOOP:
+          return MESSAGE_EXIT_LOOP;
       default:
           break;
     }
+
+  return MESSAGE_HANDLED;
 }
 
 static int api_gpio_task(int argc, char *argv[])

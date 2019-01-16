@@ -55,6 +55,12 @@ stream_fmt_t *g_fmt = NULL;
 
 #define ISPCTL_IRQ 27
 
+#define WIDTH	176
+#define HEIGHT	144
+#define STAT_DONE_POS	100
+
+//#define F2F_MODE
+
 pthread_mutex_t lock;
 pthread_cond_t cond;
 
@@ -86,25 +92,25 @@ static void load_isp_setting(void)
 	setreg32(0xfa4530c0, 0x05);
 	setreg32(0xfa4531a0, 0x03);
 
-	setreg32(0xfa4500e0, 176);
-	setreg32(0xfa4500e4, 100); // smaller than height(144)
-	setreg32(0xfa4501b0, 176);
-	setreg32(0xfa4501b4, 100); // smaller than height(144)
+	setreg32(0xfa4500e0, WIDTH);
+	setreg32(0xfa4500e4, STAT_DONE_POS); // smaller than height(HEIGHT)
+	setreg32(0xfa4501b0, WIDTH);
+	setreg32(0xfa4501b4, STAT_DONE_POS); // smaller than height(HEIGHT)
 
-	setreg32(0xfa4510e0, 176);
-	setreg32(0xfa4510e4, 100); // smaller than height(144)
-	setreg32(0xfa4511b0, 176);
-	setreg32(0xfa4511b4, 100); // smaller than height(144)
+	setreg32(0xfa4510e0, WIDTH);
+	setreg32(0xfa4510e4, STAT_DONE_POS); // smaller than height(HEIGHT)
+	setreg32(0xfa4511b0, WIDTH);
+	setreg32(0xfa4511b4, STAT_DONE_POS); // smaller than height(HEIGHT)
 
-	setreg32(0xfa4520e0, 176);
-	setreg32(0xfa4520e4, 100); // smaller than height(144)
-	setreg32(0xfa4521b0, 176);
-	setreg32(0xfa4521b4, 100); // smaller than height(144)
+	setreg32(0xfa4520e0, WIDTH);
+	setreg32(0xfa4520e4, STAT_DONE_POS); // smaller than height(HEIGHT)
+	setreg32(0xfa4521b0, WIDTH);
+	setreg32(0xfa4521b4, STAT_DONE_POS); // smaller than height(HEIGHT)
 
-	setreg32(0xfa4540e0, 176);
-	setreg32(0xfa4540e4, 100); // smaller than height(144)
-	setreg32(0xfa4541b0, 176);
-	setreg32(0xfa4541b4, 100); // smaller than height(144)
+	setreg32(0xfa4540e0, WIDTH);
+	setreg32(0xfa4540e4, STAT_DONE_POS); // smaller than height(HEIGHT)
+	setreg32(0xfa4541b0, WIDTH);
+	setreg32(0xfa4541b4, STAT_DONE_POS); // smaller than height(HEIGHT)
 
 	setreg32(0xfa4501b8, 0x2c);
 	setreg32(0xfa4501bc, 0x58);
@@ -136,8 +142,6 @@ static void load_isp_setting(void)
 
 }
 
-#define F2F_MODE
-
 int start_single_stream(void)
 {
 	if (g_fmt == NULL) {
@@ -151,18 +155,18 @@ int start_single_stream(void)
 	g_fmt->input_type = SRC_MEM;
 	g_fmt->mem_src_addr = (uint32_t *)0x80800000;
 	g_fmt->rd_port_fmt.port_en = true;
-	g_fmt->rd_port_fmt.width = 176;
-	g_fmt->rd_port_fmt.height = 144;
+	g_fmt->rd_port_fmt.width = WIDTH;
+	g_fmt->rd_port_fmt.height = HEIGHT;
 #endif
 	g_fmt->str_on_off_flag = true;
-	g_fmt->pipe_width = 176;
-	g_fmt->pipe_height = 144;
+	g_fmt->pipe_width = WIDTH;
+	g_fmt->pipe_height = HEIGHT;
 	g_fmt->port_fmt[0].port_en = true;
-	g_fmt->port_fmt[0].width = 176;
-	g_fmt->port_fmt[0].height =144;
+	g_fmt->port_fmt[0].width = WIDTH;
+	g_fmt->port_fmt[0].height =HEIGHT;
 	g_fmt->port_fmt[1].port_en = true;
-	g_fmt->port_fmt[1].width = 176;
-	g_fmt->port_fmt[1].height =144;
+	g_fmt->port_fmt[1].width = WIDTH;
+	g_fmt->port_fmt[1].height =HEIGHT;
 
 
 	setreg32(REG_ISPCTL_TRIGGER, ISPCTL_SETFMT);

@@ -227,6 +227,17 @@ int set_format(stream_fmt_t *fmt)
 			setreg32(ISP1_BASE + pipe_index * ISP_BASE_OFFSET + REG_ISP_COLORBAR, 0x00);
 		}
 
+		if (fmt->input_type == SRC_MEM) {
+			setreg32(ISP1_BASE + pipe_index * ISP_BASE_OFFSET + REG_RD_PORT_EN, 1);
+			setreg32(ISP1_BASE + pipe_index * ISP_BASE_OFFSET + REG_RD_PORT_WIDTH, fmt->rd_port_fmt.width);
+			setreg32(ISP1_BASE + pipe_index * ISP_BASE_OFFSET + REG_RD_PORT_HEIGHT, fmt->rd_port_fmt.height);
+			/* it is better to set a largr vb, else the gap between eof and next sof is to small */
+			setreg32(ISP1_BASE + REG_RD_PORT_VB, 0x100);
+
+			setreg32(ISP1_BASE + pipe_index * ISP_BASE_OFFSET + REG_RD_PORT_ADDR0, fmt->mem_src_addr);
+			setreg32(ISP1_BASE + pipe_index * ISP_BASE_OFFSET + REG_RD_PORT_ADDR1, fmt->mem_src_addr);
+		}
+
 		/* enable intr */
 		up_enable_irq(pipe_index);
 		setreg32(ISP1_BASE + pipe_index * ISP_BASE_OFFSET + INT_SOF_EOF_EN, ((1 << BIT_EOF) | (1 << BIT_SOF)));

@@ -162,6 +162,8 @@ typedef struct {
 	uint16_t pipe_width;
 	uint16_t pipe_height;
 	port_fmt_t port_fmt[PORT_NUM];
+	port_fmt_t rd_port_fmt;
+	uint32_t *mem_src_addr;
 } stream_fmt_t;
 
 #endif

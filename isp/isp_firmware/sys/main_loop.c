@@ -65,7 +65,7 @@ int eof_process(int pipe_id)
 	syslog(LOG_INFO, "%s for pipeline %d\n", __func__, pipe_id);
 //	lenc_apply_process(pipe_id);
 	ccm_process(pipe_id);
-	gamma_process(pipe_id);
+//	gamma_process(pipe_id);
 	return 0;
 }
 

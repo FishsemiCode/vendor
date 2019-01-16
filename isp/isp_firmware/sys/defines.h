@@ -163,10 +163,14 @@ extern sem_t sem_cmd_listener, sem_irq_listener, sem_mainloop;
 #define REG_PORT3_HEIGHT	0x858
 #define REG_PORT3_WIDTH		0x85c
 	#define PORT_OFFSET		0x18
+#define REG_RD_PORT_EN		0x900
+#define REG_RD_PORT_FMT		0x904
 #define REG_RD_PORT_HEIGHT	0x908
 #define REG_RD_PORT_WIDTH	0x90c
 #define REG_RD_PORT_VB		0x910
 #define REG_RD_PORT_HB		0x914
+#define REG_RD_PORT_ADDR0	0x920
+#define REG_RD_PORT_ADDR1	0x924
 
 /* operations */
 #define setreg32(addr, val)		(*(volatile uint32_t *)(addr) = (uint32_t)(val))
@@ -223,6 +227,8 @@ typedef struct {
 	uint16_t pipe_width;
 	uint16_t pipe_height;
 	port_fmt_t port_fmt[PORT_NUM];
+	port_fmt_t rd_port_fmt;
+	uint32_t *mem_src_addr;
 } stream_fmt_t;
 
 /* global control */

@@ -124,3 +124,8 @@ int gamma_process(int pipe_id)
 
 	return 0;
 }
+
+int stretch_process(int pipe_id)
+{
+	return 0;
+}

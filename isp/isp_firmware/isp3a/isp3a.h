@@ -53,5 +53,6 @@ int aecgc_apply_process(int pipe_id);
 
 int ccm_process(int pipe_id);
 int gamma_process(int pipe_id);
+int stretch_process(int pipe_id);
 
 #endif

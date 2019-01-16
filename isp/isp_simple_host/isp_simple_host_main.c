@@ -136,6 +136,8 @@ static void load_isp_setting(void)
 
 }
 
+#define F2F_MODE
+
 int start_single_stream(void)
 {
 	if (g_fmt == NULL) {
@@ -145,6 +147,13 @@ int start_single_stream(void)
 	memset(g_fmt, 0, sizeof(stream_fmt_t));
 	g_fmt->pipe_id = 0;
 	g_fmt->input_type = SRC_COLORBAR;
+#ifdef F2F_MODE
+	g_fmt->input_type = SRC_MEM;
+	g_fmt->mem_src_addr = (uint32_t *)0x80800000;
+	g_fmt->rd_port_fmt.port_en = true;
+	g_fmt->rd_port_fmt.width = 176;
+	g_fmt->rd_port_fmt.height = 144;
+#endif
 	g_fmt->str_on_off_flag = true;
 	g_fmt->pipe_width = 176;
 	g_fmt->pipe_height = 144;

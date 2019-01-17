@@ -48,7 +48,7 @@
 
 int initialize_hw(int pipe_id)
 {
-	setreg32(ISP1_BASE + pipe_id * ISP_BASE_OFFSET + REG_CC_EN, 1);
+//	setreg32(ISP1_BASE + pipe_id * ISP_BASE_OFFSET + REG_CC_EN, 1);
 	setreg32(ISP1_BASE + pipe_id * ISP_BASE_OFFSET + REG_GAMMA_EN, global_control[pipe_id]->gamma_en);
 
 	return 0;

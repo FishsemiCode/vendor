@@ -99,13 +99,17 @@ int gamma_process(int pipe_id)
 				}
 			}
 		}
+		output[i] = output[i] & 0x3ff;
 
 		w_attr = (output[i] << 10) | i;
 		setreg32(ISP1_BASE + pipe_id * ISP_BASE_OFFSET + REG_GAMMA_WRITE_ADDR, w_attr);
+		setreg32(ISP1_BASE + pipe_id * ISP_BASE_OFFSET + REG_GAMMA_WRITE_ADDR, w_attr);
 
+		r_attr = i;
+		setreg32(ISP1_BASE + pipe_id * ISP_BASE_OFFSET + REG_GAMMA_QOUT_ADDR, r_attr);
 		r_attr = getreg32(ISP1_BASE + pipe_id * ISP_BASE_OFFSET + REG_GAMMA_QOUT_ADDR);
 		r_attr = getreg32(ISP1_BASE + pipe_id * ISP_BASE_OFFSET + REG_GAMMA_QOUT_ADDR);
-		qout = r_attr & 0xff;
+		qout = (r_attr >> 10) & 0x3ff;
 		if (qout != output[i])
 			mismatch_num++;
 	}

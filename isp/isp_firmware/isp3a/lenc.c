@@ -64,18 +64,14 @@ int lenc_apply_process(int pipe_id)
 				((i & 0xff));
 
 		setreg32(ISP1_BASE + ISP_BASE_OFFSET * pipe_id + REG_LENC_COEF_ATTR, w_attr);
+		r_attr = i;
+		setreg32(ISP1_BASE + ISP_BASE_OFFSET * pipe_id + REG_LENC_COEF_RD_ATTR, r_attr);
 		r_attr = getreg32(ISP1_BASE + ISP_BASE_OFFSET * pipe_id + REG_LENC_COEF_RD_ATTR);
 		r_attr = getreg32(ISP1_BASE + ISP_BASE_OFFSET * pipe_id + REG_LENC_COEF_RD_ATTR);
-////	r_attr = getreg32(ISP1_BASE + ISP_BASE_OFFSET * pipe_id + REG_LENC_COEF_RD_ATTR);
-////	r_attr = getreg32(ISP1_BASE + ISP_BASE_OFFSET * pipe_id + REG_LENC_COEF_RD_ATTR);
-////	r_attr = getreg32(ISP1_BASE + ISP_BASE_OFFSET * pipe_id + REG_LENC_COEF_RD_ATTR);
-////	r_attr = getreg32(ISP1_BASE + ISP_BASE_OFFSET * pipe_id + REG_LENC_COEF_RD_ATTR);
-////	r_attr = getreg32(ISP1_BASE + ISP_BASE_OFFSET * pipe_id + REG_LENC_COEF_RD_ATTR);
-////	r_attr = getreg32(ISP1_BASE + ISP_BASE_OFFSET * pipe_id + REG_LENC_COEF_RD_ATTR);
 
-		middle_group[pipe_id]->lsc_r_coef[i] = (r_attr >> 16) & 0xff;
-		middle_group[pipe_id]->lsc_g_coef[i] = (r_attr >> 8) & 0xff;
-		middle_group[pipe_id]->lsc_b_coef[i] = (r_attr >> 0) & 0xff;
+		middle_group[pipe_id]->lsc_r_coef[i] = (r_attr >> 24) & 0xff;
+		middle_group[pipe_id]->lsc_g_coef[i] = (r_attr >> 16) & 0xff;
+		middle_group[pipe_id]->lsc_b_coef[i] = (r_attr >> 8) & 0xff;
 
 		if (middle_group[pipe_id]->lsc_r_coef[i] !=
 				global_control[pipe_id]->lsc_r_coef[i]) {

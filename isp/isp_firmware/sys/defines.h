@@ -149,6 +149,14 @@ extern sem_t sem_cmd_listener, sem_irq_listener, sem_mainloop;
 #define REG_GAMMA_EN	0x520
 #define REG_GAMMA_WRITE_ADDR	0x524
 #define REG_GAMMA_QOUT_ADDR		0x528
+#define REG_GAMMA_WRITE_ADDR_PIPE_0_ABS	0xfa450524
+#define REG_GAMMA_QOUT_ADDR_PIPE_0_ABS	0xfa450528
+#define REG_GAMMA_WRITE_ADDR_PIPE_1_ABS	0xfa451524
+#define REG_GAMMA_QOUT_ADDR_PIPE_1_ABS	0xfa451528
+#define REG_GAMMA_WRITE_ADDR_PIPE_2_ABS	0xfa452524
+#define REG_GAMMA_QOUT_ADDR_PIPE_2_ABS	0xfa452528
+#define REG_GAMMA_WRITE_ADDR_PIPE_3_ABS	0xfa453524
+#define REG_GAMMA_QOUT_ADDR_PIPE_3_ABS	0xfa453528
 
 #define REG_PORT0_CTRL		0x800
 #define REG_PORT0_HEIGHT	0x810
@@ -340,6 +348,8 @@ typedef struct {
 	uint32_t gb_bri[16];
 	uint32_t b_bri[16];
 	uint32_t ae_stable_flag;
+
+	uint16_t gamma_curve[1024];
 
 } middle_group_t;
 

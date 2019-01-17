@@ -73,28 +73,9 @@ int lenc_apply_process(int pipe_id)
 		middle_group[pipe_id]->lsc_g_coef[i] = (r_attr >> 16) & 0xff;
 		middle_group[pipe_id]->lsc_b_coef[i] = (r_attr >> 8) & 0xff;
 
-		if (middle_group[pipe_id]->lsc_r_coef[i] !=
-				global_control[pipe_id]->lsc_r_coef[i]) {
-			r_mismatch_num++;
-			if (if_show_mismatch_detail == true)
-				syslog(LOG_INFO, "global lsc_r_coef = 0x%x, readout lsc_r_coef = 0x%x, at index = %d\n", global_control[pipe_id]->lsc_r_coef[i], middle_group[pipe_id]->lsc_r_coef[i], i );
-		}
-		if (middle_group[pipe_id]->lsc_g_coef[i] !=
-				global_control[pipe_id]->lsc_g_coef[i]) {
-			g_mismatch_num++;
-			if (if_show_mismatch_detail == true)
-				syslog(LOG_INFO, "global lsc_g_coef = 0x%x, readout lsc_g_coef = 0x%x, at index = %d\n", global_control[pipe_id]->lsc_g_coef[i], middle_group[pipe_id]->lsc_g_coef[i], i );
-		}
-		if (middle_group[pipe_id]->lsc_b_coef[i] !=
-				global_control[pipe_id]->lsc_b_coef[i]) {
-			b_mismatch_num++;
-			if (if_show_mismatch_detail == true)
-				syslog(LOG_INFO, "global lsc_b_coef = 0x%x, readout lsc_b_coef = 0x%x, at index = %d\n", global_control[pipe_id]->lsc_b_coef[i], middle_group[pipe_id]->lsc_b_coef[i], i );
-		}
-
 	}
 
-	if (if_show_mismatch_detail == false) {
+	if ((if_show_mismatch_detail == false) && ((r_mismatch_num != 0) || (g_mismatch_num != 0) || (b_mismatch_num != 0))) {
 		syslog(LOG_INFO, "%d mismatches in r, %d mismatches in g, %d mismatches in b\n", r_mismatch_num, g_mismatch_num, b_mismatch_num);
 		r_mismatch_num = 0;
 		g_mismatch_num = 0;

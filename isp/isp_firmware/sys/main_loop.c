@@ -56,13 +56,14 @@ middle_group_t *middle_group[PIPE_NUM];
 
 int sof_process(int pipe_id)
 {
-	syslog(LOG_INFO, "%s for pipeline %d\n", __func__, pipe_id);
+//	syslog(LOG_INFO, "%s for pipeline %d\n", __func__, pipe_id);
+	gamma_calc_process(pipe_id);
 	return 0;
 }
 
 int eof_process(int pipe_id)
 {
-	syslog(LOG_INFO, "%s for pipeline %d\n", __func__, pipe_id);
+//	syslog(LOG_INFO, "%s for pipeline %d\n", __func__, pipe_id);
 	lenc_apply_process(pipe_id);
 //	ccm_process(pipe_id);
 	gamma_process(pipe_id);
@@ -71,7 +72,7 @@ int eof_process(int pipe_id)
 
 int awb_done_process(int pipe_id)
 {
-	syslog(LOG_INFO, "%s for pipeline %d\n", __func__, pipe_id);
+//	syslog(LOG_INFO, "%s for pipeline %d\n", __func__, pipe_id);
 	awb_read_process(pipe_id);
 //	awb_calc_process(pipe_id);
 	return 0;
@@ -79,7 +80,7 @@ int awb_done_process(int pipe_id)
 
 int ae_done_process(int pipe_id)
 {
-	syslog(LOG_INFO, "%s for pipeline %d\n", __func__, pipe_id);
+//	syslog(LOG_INFO, "%s for pipeline %d\n", __func__, pipe_id);
 	aecgc_read_process(pipe_id);
 	aecgc_calc_process(pipe_id);
 	return 0;

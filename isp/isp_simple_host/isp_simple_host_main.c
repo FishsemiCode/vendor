@@ -55,9 +55,9 @@ stream_fmt_t *g_fmt = NULL;
 
 #define ISPCTL_IRQ 27
 
-#define WIDTH	176
-#define HEIGHT	144
-#define STAT_DONE_POS	100
+#define WIDTH	640
+#define HEIGHT	480
+#define STAT_DONE_POS	320
 
 //#define F2F_MODE
 

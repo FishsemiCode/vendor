@@ -49,10 +49,23 @@
  * is called at ae done or eof, there maybe is no enough time, so it is a alternative
  * option to call this process at sof */
 
-int gamma_process(int pipe_id)
+uint32_t *gamma_write_addr[PIPE_NUM] = {
+	[0] = (uint32_t *)0xfa450524,
+	[1] = (uint32_t *)0xfa451524,
+	[2] = (uint32_t *)0xfa452524,
+	[3] = (uint32_t *)0xfa453524,
+};
+
+uint32_t *gamma_qout_addr[PIPE_NUM] = {
+	[0] = (uint32_t *)0xfa450528,
+	[1] = (uint32_t *)0xfa451528,
+	[2] = (uint32_t *)0xfa452528,
+	[3] = (uint32_t *)0xfa453528,
+};
+
+int gamma_calc_process(int pipe_id)
 {
 	int i = 0, j = 0;
-	int mismatch_num = 0;
 
 	/* 46 segment curve convert logic */
 	uint16_t *xs = (uint16_t *)global_control[pipe_id]->gamma_index;
@@ -70,8 +83,6 @@ int gamma_process(int pipe_id)
 	uint32_t exp_idx = middle_group[pipe_id]->exp_idx;
 
 	uint16_t *output = (uint16_t *)malloc(sizeof(uint16_t) * 1024);
-	uint16_t qout;
-	uint32_t w_attr, r_attr;
 
 	for (i = 0; i < 46; i++) {
 		if (exp_idx < th_0) {
@@ -87,35 +98,14 @@ int gamma_process(int pipe_id)
 		}
 	}
 
-	for (i = 0; i < 1024; i++) {
-		if (i < xs[0]) {
-			output[i] = interp(i, 0, xs[0], 0, ys[0]);
-		} else if (i >= xs[45]) {
-			output[i] = interp(i, xs[45], 1024, ys[45], 1024);
-		} else {
-			for (j = 0; j < 45; j++) {
-				if ((i >= xs[j]) && (i < xs[j+1])) {
-					output[i] = interp(i, xs[j], xs[j+1], ys[j], ys[j+1]);
-				}
-			}
-		}
-		output[i] = output[i] & 0x3ff;
-
-		w_attr = (output[i] << 10) | i;
-		setreg32(ISP1_BASE + pipe_id * ISP_BASE_OFFSET + REG_GAMMA_WRITE_ADDR, w_attr);
-		setreg32(ISP1_BASE + pipe_id * ISP_BASE_OFFSET + REG_GAMMA_WRITE_ADDR, w_attr);
-
-		r_attr = i;
-		setreg32(ISP1_BASE + pipe_id * ISP_BASE_OFFSET + REG_GAMMA_QOUT_ADDR, r_attr);
-		r_attr = getreg32(ISP1_BASE + pipe_id * ISP_BASE_OFFSET + REG_GAMMA_QOUT_ADDR);
-		r_attr = getreg32(ISP1_BASE + pipe_id * ISP_BASE_OFFSET + REG_GAMMA_QOUT_ADDR);
-		qout = (r_attr >> 10) & 0x3ff;
-		if (qout != output[i])
-			mismatch_num++;
+	for (i = 0; (i < xs[0]) && (i < 1024); i++) {
+		middle_group[pipe_id]->gamma_curve[i] = interp(i, 0, xs[0], 0, ys[0]);
 	}
-
-	if (mismatch_num != 0)
-		syslog(LOG_INFO, "%d mismatch between input and qout in %s\n", mismatch_num, __func__);
+	for (j = 0; j < 45; j++) {
+		for(i = xs[j]; (i < xs[j+1]) && (i < 1024); i++) {
+			middle_group[pipe_id]->gamma_curve[i] = interp(i, xs[j], xs[j+1], ys[j], ys[j+1]);
+		}
+	}
 
 	if (output != NULL) {
 		free(output);
@@ -125,6 +115,28 @@ int gamma_process(int pipe_id)
 		free(output);
 		output = NULL;
 	}
+
+	return 0;
+}
+
+int gamma_process(int pipe_id)
+{
+	int i = 0, mismatch_num = 0;
+	uint16_t qout;
+	uint32_t w_attr, r_attr;
+
+	for (i = 0; i < 1024; i++) {
+		w_attr = (middle_group[pipe_id]->gamma_curve[i] << 10) | i;
+		setreg32(gamma_write_addr[pipe_id], w_attr);
+		setreg32(gamma_qout_addr[pipe_id], i);
+		r_attr = getreg32(gamma_qout_addr[pipe_id]);
+		qout = (r_attr >> 10) & 0x3ff;
+		if (qout != middle_group[pipe_id]->gamma_curve[i])
+			mismatch_num++;
+	}
+
+	if (mismatch_num != 0)
+		syslog(LOG_INFO, "%d mismatch between input and qout in %s\n", mismatch_num, __func__);
 
 	return 0;
 }

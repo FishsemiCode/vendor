@@ -13,6 +13,8 @@ cscope.out
 /bootloader
 /example/headset
 /frameworks
+/images
+/isp
 /system
 /services
 /tools

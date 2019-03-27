@@ -1,3 +1,0 @@
-ifneq ($(CONFIG_AUDIO_SERVICE),)
-CONFIGURED_APPS += external/services/audio
-endif

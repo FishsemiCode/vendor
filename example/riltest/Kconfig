@@ -1,0 +1,33 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+config RILTEST
+	bool "RILTEST"
+	default n
+	select SERVICES_RIL
+	---help---
+	Enable the RILTEST
+
+if RILTEST
+
+config RILTEST_PRIORITY
+	int "riltest task priority"
+	default 80
+	---help---
+	The priority for riltest task.
+
+config RILTEST_STACKSIZE
+	int "riltest task stack size"
+	default 2048
+	---help---
+	The stack size allocated for the riltest task.
+
+config RILTEST_AUTO_START
+	bool "riltest auto start"
+	default n
+	---help---
+	Start the riltest automatically.
+
+endif # RILTEST
+

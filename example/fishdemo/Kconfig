@@ -5,7 +5,7 @@
 
 config FISHDEMO
 	bool "FISHDEMO"
-	default n
+	default y
 	select FS_FAT
 	select SCHED_WORKQUEUE
 	select SIG_EVTHREAD

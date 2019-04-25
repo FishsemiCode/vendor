@@ -5,7 +5,7 @@
 
 config GPSTEST
 	bool "GPSTEST"
-	default n
+	default y
 	select SERVICES_RIL
 	select NETUTILS_PING if NET_ICMP_SOCKET
 	select NETUTILS_PING6 if NET_ICMPv6_SOCKET

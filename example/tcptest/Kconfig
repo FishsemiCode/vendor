@@ -1,0 +1,51 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config TCPTEST
+	bool "TCPTEST"
+	default n
+	select SERVICES_RIL
+	select NETUTILS_PING if NET_ICMP_SOCKET
+	select NETUTILS_PING6 if NET_ICMPv6_SOCKET
+	---help---
+	Enable the TCPTEST
+
+if TCPTEST
+
+config TCPTEST_PRIORITY
+	int "tcptest task priority"
+	default 80
+	---help---
+	The priority for tcptest task.
+
+config TCPTEST_STACKSIZE
+	int "tcptest task stack size"
+	default 2048
+	---help---
+	The stack size allocated for the tcptest task.
+
+config TCPTEST_AUTO_START
+	bool "tcptest auto start"
+	default n
+	---help---
+	Start the tcptest automatically.
+
+endif # TCPTEST
+
+if TCPTEST_AUTO_START
+
+config TCPTEST_REMOTE_IP
+	string "tcptest remote ip address"
+	default ""
+	---help---
+	The remote ip address to communicate.
+
+config TCPTEST_REMOTE_PORT
+	int "tcptest remote port"
+	default 0
+	---help---
+	The remote port to communicate.
+
+endif # TCPTEST_AUTO_START

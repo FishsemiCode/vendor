@@ -4,7 +4,7 @@
 #
 config RILTEST
 	bool "RILTEST"
-	default y
+	default n
 	select SERVICES_RIL
 	---help---
 	Enable the RILTEST

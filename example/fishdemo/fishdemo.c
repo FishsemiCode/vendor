@@ -37,6 +37,7 @@
  * Included Files
  ****************************************************************************/
 
+#include <sys/ioctl.h>
 #include <sys/time.h>
 #include <sys/types.h>
 #include <sys/mount.h>
@@ -59,6 +60,7 @@
 #include "mount.h"
 
 #include <nuttx/drivers/ramdisk.h>
+#include <nuttx/timers/rtc.h>
 
 #include "fsutils/mkfatfs.h"
 #include "mount.h"
@@ -955,6 +957,51 @@ static void fs_test(void)
     }
 }
 
+static void rtc_test(void)
+{
+  int fd;
+
+  struct rtc_setalarm_s alarminfo =
+  {
+    .id  = 0,
+    .pid = 0,
+    .event =
+    {
+      .sigev_notify            = SIGEV_SIGNAL,
+      .sigev_signo             = SIGALRM,
+      .sigev_value.sival_int   = 0,
+#ifdef CONFIG_SIG_EVTHREAD
+      .sigev_notify_function   = NULL,
+      .sigev_notify_attributes = NULL,
+#endif
+    }
+  };
+  struct rtc_time curtime;
+
+  fd = open("/dev/rtc0", 0);
+  if (fd < 0)
+  {
+    printf("%s, error, line %d\n", __func__, __LINE__);
+    return;
+  }
+
+  ioctl(fd, RTC_RD_TIME, (unsigned long)&curtime);
+  printf("%s, curtime %d, line %d\n", __func__, curtime.tm_sec, __LINE__);
+  curtime.tm_sec += 2;
+  memcpy(&alarminfo.time, &curtime, sizeof(struct rtc_time));
+  printf("%s, curtime %d, line %d\n", __func__, alarminfo.time.tm_sec, __LINE__);
+
+  ioctl(fd, RTC_SET_ALARM, (unsigned long)&alarminfo);
+
+  syslog(LOG_INFO, "%s, line %d\n", __func__, __LINE__);
+
+  sleep(10);
+  ioctl(fd, RTC_RD_TIME, (unsigned long)&curtime);
+  printf("%s, curtime %d, line %d\n", __func__, curtime.tm_sec, __LINE__);
+
+  close(fd);
+}
+
 /****************************************************************************
  * Public function
  ****************************************************************************/
@@ -965,20 +1012,22 @@ int fishdemo_main(int argc, char *argv[])
 #endif
 {
 
-  printf("############ 1 task test #################\n");
+  printf("1. task test  \n######################################\n");
   task_test();
-  printf("############ 2 mqueue test #################\n");
+  printf("############################\n2. mqueue test\n######################################\n");
   thread_mq_test();
-  printf("############ 3 clock test #################\n");
+  printf("############################\n3. clock test \n######################################\n");
   clocks_test();
-  printf("############ 4 signal test #################\n");
+  printf("############################\n4. signal test\n######################################\n");
   signal_test();
-  printf("############ 5 mutex test #################\n");
+  printf("############################\n5. mutex test \n######################################\n");
   mutex_test();
-  printf("############ 6 cond test #################\n");
+  printf("############################\n6. cond test  \n######################################\n");
   cond_test();
-  printf("############ 7 fs test #################\n");
+  printf("############################\n7. fs test    \n######################################\n");
   fs_test();
+  printf("############################\n8. rtc test   \n######################################\n");
+  rtc_test();
 
   return EXIT_SUCCESS;
 }

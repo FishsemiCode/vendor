@@ -1,0 +1,25 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config RTCTEST
+	bool "RTCTEST"
+	default n
+	select SCHED_WORKQUEUE
+	select SIG_EVTHREAD
+	select SCHED_LPWORK
+	---help---
+	Enable the RTCTEST
+
+if RTCTEST
+
+config RTCTEST_PRIORITY
+	int "RTCTest task priority"
+	default 100
+
+config RTCTEST_STACKSIZE
+	int "RTCTest stack size"
+	default 2048
+
+endif

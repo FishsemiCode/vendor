@@ -97,11 +97,24 @@ static char g_gps_decoder[3][32];
 
 static unsigned char g_gps_timeout = 60;
 
+
+static uint32_t gettime(void)
+{
+  uint64_t rtime = 0;
+  struct timespec t;
+  t.tv_sec = t.tv_nsec = 0;
+  clock_gettime(CLOCK_MONOTONIC, &t);
+  rtime = (((t.tv_sec) * 1000000000LL + t.tv_nsec));
+  rtime = rtime / 1000 / 1000 / 1000;
+  return (uint32_t)rtime;
+}
+
 int get_gps_info(int fd)
 {
   int ret;
   struct timespec time;
   struct timeval now;
+  static uint32_t lastSaveTime;
 
   syslog(LOG_INFO, "%s: Stop NB by CFUN=0\n", __func__);
   ret = set_radiopower(fd, false);
@@ -116,6 +129,10 @@ int get_gps_info(int fd)
     {
       syslog(LOG_ERR, "%s: start_gps fail\n", __func__);
       return -1;
+    }
+  if (g_gps_flag == 2 && (gettime() - lastSaveTime) > 60 * 60)
+    {
+      g_gps_flag = 0;
     }
 
   // wait for GPS position data
@@ -133,6 +150,7 @@ int get_gps_info(int fd)
     syslog(LOG_INFO, "%s: wait 30s to save GPS parameters\n", __func__);
     usleep(30000000);
     g_gps_flag = 2;
+    lastSaveTime = gettime();
   }
 
   // stop GPS

@@ -58,7 +58,9 @@
 
 #include <sys/time.h>
 #include <sys/boardctl.h>
+#include <sys/ioctl.h>
 #include <nuttx/board.h>
+#include <nuttx/timers/rtc.h>
 #include "at_api.h"
 
 /****************************************************************************
@@ -68,7 +70,6 @@
 // TO-DO:
 #define REMOTE_IPADDR           "101.200.151.218"   // Server IP Address
 #define REMOTE_TCPPORT          9589           // Server TCP port number
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -381,6 +382,35 @@ static void handle_gprmc(const char *s)
     }
 }
 
+static void rtc_sleep(int fd, int seconds)
+{
+  struct rtc_time curtime;
+  struct rtc_setalarm_s alarminfo =
+  {
+    .id  = 0,
+    .pid = 0,
+    .event =
+    {
+      .sigev_notify            = SIGEV_SIGNAL,
+      .sigev_signo             = SIGALRM,
+      .sigev_value.sival_int   = 0,
+#ifdef CONFIG_SIG_EVTHREAD
+      .sigev_notify_function   = NULL,
+      .sigev_notify_attributes = NULL,
+#endif
+    }
+  };
+  ioctl(fd, RTC_RD_TIME, (unsigned long)&curtime);
+  syslog(LOG_INFO, "%s: Curtime is %d\n", __func__, curtime.tm_sec);
+  curtime.tm_sec += seconds;
+  memcpy(&alarminfo.time, &curtime, sizeof(struct rtc_time));
+  syslog(LOG_INFO, "%s: Should be wake at %d\n", __func__, alarminfo.time.tm_sec);
+  ioctl(fd, RTC_SET_ALARM, (unsigned long)&alarminfo);
+  sleep(seconds);
+  ioctl(fd, RTC_RD_TIME, (unsigned long)&curtime);
+  syslog(LOG_INFO, "%s: Actually curtime at %d\n", __func__, curtime.tm_sec);
+}
+
 
 #ifdef BUILD_MODULE
 int main(int argc, char *argv[])
@@ -391,7 +421,25 @@ int gpstest_main(int argc, char *argv[])
   int ret;
   int clientfd;
   int errCnt = 0;
+  int rtcfd = -1;
+  int seconds = 0;
+
   syslog(LOG_INFO, "%s: gpstest running\n", __func__);
+
+  if (argc == 2)
+    {
+      seconds = atoi(argv[1]);
+    }
+
+  if (seconds > 0)
+    {
+      rtcfd = open("/dev/rtc0", 0);
+      if(rtcfd < 0)
+        {
+          syslog(LOG_ERR, "%s: Open rtc error\n", __func__);
+          goto clean;
+        }
+    }
 
   pthread_mutex_init(&g_gps_mutex, NULL);
   pthread_cond_init(&g_gps_cond, NULL);
@@ -422,7 +470,6 @@ int gpstest_main(int argc, char *argv[])
       syslog(LOG_ERR, "set_ceregindicationstatus fail\n");
       goto clean;
     }
-
   get_nb_imei(clientfd);
 
   // default latitude and langitude
@@ -442,6 +489,7 @@ int gpstest_main(int argc, char *argv[])
                 }
               continue;
             }
+          errCnt = 0;
         }
       pthread_mutex_lock(&g_gps_mutex);
       while (!is_registered(g_reg_staus))
@@ -451,9 +499,17 @@ int gpstest_main(int argc, char *argv[])
       pthread_mutex_unlock(&g_gps_mutex);
       // send data to NB
       nb_send2server(clientfd);
-    }
 
+      if (seconds > 0)
+        {
+          rtc_sleep(rtcfd, seconds);
+        }
+    }
 clean:
+  if (rtcfd >= 0)
+    {
+      close(rtcfd);
+    }
   at_client_close(clientfd);
   pthread_mutex_destroy(&g_gps_mutex);
   pthread_cond_destroy(&g_gps_cond);

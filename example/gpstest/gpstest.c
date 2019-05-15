@@ -98,6 +98,8 @@ static char g_gps_decoder[3][32];
 
 static unsigned char g_gps_timeout = 60;
 
+static unsigned short g_deep_sleep_period = 15 * 60;
+
 
 static uint32_t gettime(void)
 {
@@ -110,7 +112,7 @@ static uint32_t gettime(void)
   return (uint32_t)rtime;
 }
 
-int get_gps_info(int fd)
+int get_gps_info(int fd, int seconds)
 {
   int ret;
   struct timespec time;
@@ -146,7 +148,7 @@ int get_gps_info(int fd)
   syslog(LOG_INFO, "%s: pthread_cond_timedwait:%d\n", __func__, ret);
   pthread_mutex_unlock(&g_gps_mutex);
 
-  if (g_gps_flag == 1)
+  if (g_gps_flag == 1 && (seconds < g_deep_sleep_period))
   {
     syslog(LOG_INFO, "%s: wait 30s to save GPS parameters\n", __func__);
     usleep(30000000);
@@ -480,7 +482,7 @@ int gpstest_main(int argc, char *argv[])
       // get GPS data
       if (g_gps_enable_flag == 1)
         {
-          if (get_gps_info(clientfd) < 0)
+          if (get_gps_info(clientfd, seconds) < 0)
             {
               errCnt++;
               if (errCnt > 5)

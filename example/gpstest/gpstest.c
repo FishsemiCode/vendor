@@ -126,6 +126,9 @@ int get_gps_info(int fd, int seconds)
       syslog(LOG_ERR, "%s: set_radiopower fail\n", __func__);
       return -1;
     }
+  pthread_mutex_lock(&g_gps_mutex);
+  g_reg_staus = 0;
+  pthread_mutex_unlock(&g_gps_mutex);
 
   ret = start_gps(fd);
   if (ret < 0)

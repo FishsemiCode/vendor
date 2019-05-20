@@ -62,6 +62,14 @@ static void mask_sleep(void)
 {
   putreg32(0x70007, 0xb004035c);
   putreg32(0x3000300, 0xb0040354);
+
+  putreg32(0x10000, 0xB0040208);    //TOP_PWR_RFPHY_PD_CTL.ISO_EN=0
+  putreg32(0x47FE0146, 0xB0180008); //config RFPHY, disable TCXO circuit
+  putreg32(0x1F7F0000, 0xB01800E8); //config RFPHY, disable TCXO circuit
+  putreg32(0x10001, 0xB0040208);    //rf_off TOP_PWR_RFPHY_PD_CTL.ISO_EN=1
+  putreg32(0x1, 0xB2010010);        //PMICFSM_CONFIG2, RF_DEEPSLEEP_REQ=1
+  putreg32(0x11, 0xB2010010);       //PMICFSM_CONFIG2, RF_ISO_EN=1
+
 }
 
 static void rtc_test(int sec)

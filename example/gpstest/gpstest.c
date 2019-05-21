@@ -390,6 +390,8 @@ static void handle_gprmc(const char *s)
 static void rtc_sleep(int fd, int seconds)
 {
   struct rtc_time curtime;
+  time_t nxtime;
+
   struct rtc_setalarm_s alarminfo =
   {
     .id  = 0,
@@ -405,15 +407,20 @@ static void rtc_sleep(int fd, int seconds)
 #endif
     }
   };
+
   ioctl(fd, RTC_RD_TIME, (unsigned long)&curtime);
-  syslog(LOG_INFO, "%s: Curtime is %d\n", __func__, curtime.tm_sec);
-  curtime.tm_sec += seconds;
-  memcpy(&alarminfo.time, &curtime, sizeof(struct rtc_time));
-  syslog(LOG_INFO, "%s: Should be wake at %d\n", __func__, alarminfo.time.tm_sec);
+  nxtime = mktime((FAR struct tm *)&curtime) + seconds;
+  gmtime_r(&nxtime, (FAR struct tm *)&alarminfo.time);
   ioctl(fd, RTC_SET_ALARM, (unsigned long)&alarminfo);
+  syslog(LOG_INFO, "Curtime: [%02d:%02d:%02d], should wakeup at [%02d:%02d:%02d]\n",
+          curtime.tm_hour, curtime.tm_min, curtime.tm_sec,
+          alarminfo.time.tm_hour, alarminfo.time.tm_min, alarminfo.time.tm_sec);
+
   sleep(seconds);
+
   ioctl(fd, RTC_RD_TIME, (unsigned long)&curtime);
-  syslog(LOG_INFO, "%s: Actually curtime at %d\n", __func__, curtime.tm_sec);
+  syslog(LOG_INFO, "Curtime: [%02d:%02d:%02d], ACT\n",
+          curtime.tm_hour, curtime.tm_min, curtime.tm_sec);
 }
 
 

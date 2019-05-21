@@ -74,6 +74,8 @@ static void mask_sleep(void)
 
 static void rtc_test(int sec)
 {
+  struct rtc_time curtime;
+  time_t nxtime;
   int fd;
 
   struct rtc_setalarm_s alarminfo =
@@ -91,7 +93,6 @@ static void rtc_test(int sec)
 #endif
     }
   };
-  struct rtc_time curtime;
 
   fd = open("/dev/rtc0", 0);
   if (fd < 0)
@@ -101,14 +102,17 @@ static void rtc_test(int sec)
   }
 
   ioctl(fd, RTC_RD_TIME, (unsigned long)&curtime);
-  printf("Curtime is %d\n", curtime.tm_sec);
-  curtime.tm_sec += sec;
-  memcpy(&alarminfo.time, &curtime, sizeof(struct rtc_time));
-  printf("Should be wake at %d\n", alarminfo.time.tm_sec);
+  nxtime = mktime((FAR struct tm *)&curtime) + sec;
+  gmtime_r(&nxtime, (FAR struct tm *)&alarminfo.time);
   ioctl(fd, RTC_SET_ALARM, (unsigned long)&alarminfo);
-  sleep(100000);
+  printf("Curtime: [%02d:%02d:%02d], should wakeup at [%02d:%02d:%02d]\n",
+          curtime.tm_hour, curtime.tm_min, curtime.tm_sec,
+          alarminfo.time.tm_hour, alarminfo.time.tm_min, alarminfo.time.tm_sec);
+
+  sleep(sec);
+
   ioctl(fd, RTC_RD_TIME, (unsigned long)&curtime);
-  printf("Actually curtime at %d\n", curtime.tm_sec);
+  printf("Curtime: [%02d:%02d:%02d], ACT\n", curtime.tm_hour, curtime.tm_min, curtime.tm_sec);
 
   close(fd);
 }

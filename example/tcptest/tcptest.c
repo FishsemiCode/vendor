@@ -129,7 +129,7 @@ retry:
         }
       } while (sock_fd < 0);
 
-  tv.tv_sec = 2;
+  tv.tv_sec = 5;
   tv.tv_usec = 0;
   setsockopt(sock_fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
 

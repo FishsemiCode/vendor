@@ -47,35 +47,46 @@
 
 #include <nuttx/timers/rtc.h>
 
+#define SIGVALUE_INT  42
+
+/****************************************************************************
+ * Static Data
+ ****************************************************************************/
+
+static sem_t g_rtc_sem;
+static int g_rtc_received;
 
 /****************************************************************************
  * Private Function
  ****************************************************************************/
 
+#ifdef CONFIG_CAN_PASS_STRUCTS
+static void rtc_callbck(union sigval value)
+#else
+static void rtc_callbck(FAR void *sival_ptr)
+#endif
+{
+#ifdef CONFIG_CAN_PASS_STRUCTS
+  int sival_int = value.sival_int;
+#else
+  int sival_int = (int)((intptr_t)sival_ptr);
+#endif
+
+  printf("%s: Received value %d, post semaphore\n", __func__, sival_int);
+
+  g_rtc_received = sival_int;
+  sem_post(&g_rtc_sem);
+}
+
 /****************************************************************************
  * rtc_test
  ****************************************************************************/
-
-# define putreg32(v,a)        (*(volatile uint32_t *)(a) = (v))
-
-static void mask_sleep(void)
-{
-  putreg32(0x70007, 0xb004035c);
-  putreg32(0x3000300, 0xb0040354);
-
-  putreg32(0x10000, 0xB0040208);    //TOP_PWR_RFPHY_PD_CTL.ISO_EN=0
-  putreg32(0x47FE0146, 0xB0180008); //config RFPHY, disable TCXO circuit
-  putreg32(0x1F7F0000, 0xB01800E8); //config RFPHY, disable TCXO circuit
-  putreg32(0x10001, 0xB0040208);    //rf_off TOP_PWR_RFPHY_PD_CTL.ISO_EN=1
-  putreg32(0x1, 0xB2010010);        //PMICFSM_CONFIG2, RF_DEEPSLEEP_REQ=1
-  putreg32(0x11, 0xB2010010);       //PMICFSM_CONFIG2, RF_ISO_EN=1
-
-}
 
 static void rtc_test(int sec)
 {
   struct rtc_time curtime;
   time_t nxtime;
+  int status;
   int fd;
 
   struct rtc_setalarm_s alarminfo =
@@ -84,15 +95,17 @@ static void rtc_test(int sec)
     .pid = 0,
     .event =
     {
-      .sigev_notify            = SIGEV_SIGNAL,
+      .sigev_notify            = SIGEV_THREAD,
       .sigev_signo             = SIGALRM,
-      .sigev_value.sival_int   = 0,
+      .sigev_value.sival_int   = SIGVALUE_INT,
 #ifdef CONFIG_SIG_EVTHREAD
-      .sigev_notify_function   = NULL,
+      .sigev_notify_function   = rtc_callbck,
       .sigev_notify_attributes = NULL,
 #endif
     }
   };
+
+  sem_init(&g_rtc_sem, 0, 0);
 
   fd = open("/dev/rtc0", 0);
   if (fd < 0)
@@ -105,21 +118,54 @@ static void rtc_test(int sec)
   nxtime = mktime((FAR struct tm *)&curtime) + sec;
   gmtime_r(&nxtime, (FAR struct tm *)&alarminfo.time);
   ioctl(fd, RTC_SET_ALARM, (unsigned long)&alarminfo);
+
   printf("Curtime: [%02d:%02d:%02d], should wakeup at [%02d:%02d:%02d]\n",
           curtime.tm_hour, curtime.tm_min, curtime.tm_sec,
           alarminfo.time.tm_hour, alarminfo.time.tm_min, alarminfo.time.tm_sec);
 
-  sleep(sec);
+  printf("%s: Waiting on semaphore\n", __func__);
+
+  do
+    {
+      status = sem_wait(&g_rtc_sem);
+      if (status < 0)
+        {
+          int error = errno;
+          if (error == EINTR)
+            {
+              printf("%s: sem_wait() interrupted by signal\n", __func__);
+            }
+          else
+            {
+              printf("%s: ERROR sem_wait failed, errno=%d\n", __func__, error);
+              goto errorout;
+            }
+        }
+    }
+  while (status < 0);
+
+  printf("%s: Awakened with no error!\n", __func__);
+
+  /* Check sigval */
+
+  if (g_rtc_received != SIGVALUE_INT)
+    {
+      printf("rtc_callbck: ERROR sival_int=%d expected %d\n",
+             g_rtc_received, SIGVALUE_INT);
+    }
 
   ioctl(fd, RTC_RD_TIME, (unsigned long)&curtime);
   printf("Curtime: [%02d:%02d:%02d], ACT\n", curtime.tm_hour, curtime.tm_min, curtime.tm_sec);
 
+errorout:
+  sem_destroy(&g_rtc_sem);
   close(fd);
 }
 
 /****************************************************************************
  * Public function
  ****************************************************************************/
+
 #if defined(BUILD_MODULE)
 int main(int argc, FAR char *argv[])
 #else
@@ -131,7 +177,6 @@ int rtctest_main(int argc, char *argv[])
     return EXIT_SUCCESS;
   }
 
-  mask_sleep();
   rtc_test(atoi(argv[1]));
 
   return EXIT_SUCCESS;

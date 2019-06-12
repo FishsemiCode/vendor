@@ -142,6 +142,7 @@ retry:
 
   if (setsockopt(sock_fd, SOL_SOCKET, SO_LINGER, &ling, sizeof(struct linger)) < 0)
     {
+      close(sock_fd);
       syslog(LOG_ERR, "%s: set LINGER failed %d wait 1s to repeat\r\n", __func__, errno);
       goto retry;
     }

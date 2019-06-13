@@ -106,6 +106,7 @@ static void nb_send2server(int fd, char *addr, int port)
   struct sockaddr_in remote;
   int ret;
   int cnt = 0;
+  struct timeval tv;
   at_api_cellinfo cellinfo;
   struct linger ling;
 
@@ -128,6 +129,10 @@ retry:
           syslog(LOG_INFO, "%s: create sock successful\r\n", __func__);
         }
       } while (sock_fd < 0);
+
+  tv.tv_sec = 30;
+  tv.tv_usec = 0;
+  setsockopt(sock_fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
 
   remote.sin_family = AF_INET;
   remote.sin_port = HTONS(port);

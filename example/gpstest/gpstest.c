@@ -202,6 +202,7 @@ void nb_send2server(int fd)
   int cnt = 0;
   struct timeval tv;
   at_api_cellinfo cellinfo;
+  struct linger ling;
 
 retry:
   cnt ++;
@@ -233,6 +234,16 @@ retry:
   if (ret < 0)
     {
       syslog(LOG_ERR, "%s: error remot IP addr %d\r\n", __func__, ret);
+    }
+
+  ling.l_onoff  = 1;
+  ling.l_linger = 5;     /* timeout is seconds */
+
+  if (setsockopt(sock_fd, SOL_SOCKET, SO_LINGER, &ling, sizeof(struct linger)) < 0)
+    {
+      close(sock_fd);
+      syslog(LOG_ERR, "%s: set LINGER failed %d wait 1s to repeat\r\n", __func__, errno);
+      goto retry;
     }
 
   // connect

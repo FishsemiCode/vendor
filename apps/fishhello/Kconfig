@@ -1,0 +1,26 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config APP_FISHHELLO
+	bool "APP Hello World"
+	default n
+
+if APP_FISHHELLO
+
+config APP_FISHHELLO_PRIORITY
+	int "fishhello task priority"
+	default 100
+
+config APP_FISHHELLO_STACKSIZE
+	int "fishhello stack size"
+	default 2048
+
+config APP_FISHHELLO_AUTO_START
+	bool "fishhello auto start"
+	default n
+	---help---
+	Start the fishdemo automatically.
+
+endif

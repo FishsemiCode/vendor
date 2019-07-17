@@ -1,0 +1,23 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config APP_FISHLED
+	bool "APP FISHLED"
+	default n
+	depends on FISHLED
+	---help---
+		Enable the FISHLED example
+
+if APP_FISHLED
+
+config APP_FISHLED_PRIORITY
+	int "FISHLED task priority"
+	default 100
+
+config APP_FISHLED_STACKSIZE
+	int "FISHLED stack size"
+	default 2048
+
+endif

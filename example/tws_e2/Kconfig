@@ -1,0 +1,26 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config EXAMPLES_TWS_E2
+    tristate "tws e2 example"
+    default y
+    ---help---
+        Enable the tws e2 example
+
+if EXAMPLES_TWS_E1
+
+config EXAMPLES_TWS_E2_PROGNAME
+    string "Program name"
+    default "tws_e2"
+
+config EXAMPLES_TWS_E2_PRIORITY
+    int "tws e1 task priority"
+    default 100
+
+config EXAMPLES_TWS_E2_STACKSIZE
+    int "tws e1 stack size"
+    default 2048
+
+endif

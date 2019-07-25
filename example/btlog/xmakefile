@@ -1,0 +1,139 @@
+#
+# Copyright (C) 2018 Pinecone
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+LOCAL_DIR := $(abspath $(dir $(word $(words $(MAKEFILE_LIST)),$(MAKEFILE_LIST))))
+
+HIDE := @
+ifeq ($(V),1)
+	HIDE :=
+endif
+
+ifneq ($(O),)
+BUILDROOT := $(O)
+else
+BUILDROOT := $(LOCAL_DIR)/out
+endif
+
+ifeq ($(BIN_DIR),)
+BIN_DIR := $(LOCAL_DIR)/out
+endif
+
+SYSTEM := $(shell uname -s)
+FOUND := $(findstring Linux,$(SYSTEM))
+ifeq ($(FOUND), Linux)
+SYSTEM := linux
+else
+FOUND := $(findstring CYGWIN,$(SYSTEM))
+ifeq ($(FOUND), CYGWIN)
+SYSTEM := windows
+endif
+endif
+
+ifeq ($(CROSSDEV),)
+CROSSDEV=$(LOCAL_DIR)/../../../../prebuilts/gcc/$(SYSTEM)/riscv/bin/riscv64-unknown-elf-
+endif
+
+MKDIR = if [ ! -d $(dir $@) ]; then mkdir -p $(dir $@); fi
+GIT_EXISTS = $(shell [ -e $(LOCAL_DIR)/.git ] && echo 1 || echo 0)
+
+CCACHE ?=
+CC := $(CCACHE) $(CROSSDEV)gcc
+LD := $(CROSSDEV)ld
+OBJDUMP := $(CROSSDEV)objdump
+OBJCOPY := $(CROSSDEV)objcopy
+CPPFILT := $(CROSSDEV)c++filt
+SIZE := $(CROSSDEV)size
+
+ARCHFLAGS := -march=rv32imc -mabi=ilp32 -mcmodel=medany
+CFLAGS := -Os -g --std=gnu11
+CFLAGS += -ffunction-sections -fdata-sections -fno-common -finline
+CFLAGS += -Wall -Wno-sign-compare -Wno-unused-parameter -Werror=return-type -Werror-implicit-function-declaration -Wno-incompatible-pointer-types -Wno-sizeof-pointer-memaccess
+# CFLAGS += -DFLASH_ERASE
+# CFLAGS += -DDEBUG
+
+ifeq ($(GIT_EXISTS), 1)
+	VERSION := $(shell git rev-parse HEAD | cut -c1-8)
+	CFLAGS_VERSION := -DVERSION_NUM="\"$(VERSION)\""
+endif
+
+# find the direct path to libgcc.a for our particular multilib variant
+LIBGCC := $(shell $(CROSSDEV)gcc $(ARCHFLAGS) -print-file-name=libm.a)
+LIBGCC += $(shell $(CROSSDEV)gcc $(ARCHFLAGS) -print-file-name=libgcc.a)
+LIBGCC += $(shell $(CROSSDEV)gcc $(ARCHFLAGS) -print-file-name=libc_nano.a)
+
+LKSCRIPT := $(LOCAL_DIR)/btlog.ld
+LDFLAGS := -melf32lriscv -nostartfiles -static
+LDFLAGS += --cref -dT $(LKSCRIPT) --gc-sections
+LDFLAGS += -Map $(BUILDROOT)/btlog.map
+LDFLAGS += --print-memory-usage
+
+ASM_SRC = \
+	  $(LOCAL_DIR)/startup.S
+
+C_SRC = \
+	  $(LOCAL_DIR)/main.c \
+
+MKFILE := $(lastword $(MAKEFILE_LIST))
+ASM_OBJ := $(patsubst $(LOCAL_DIR)/%.S, $(BUILDROOT)/%.o, $(ASM_SRC))
+C_OBJ := $(patsubst $(LOCAL_DIR)/%.c, $(BUILDROOT)/%.o, $(C_SRC))
+DEP := $(patsubst $(LOCAL_DIR)/%.c, $(BUILDROOT)/%.d, $(C_SRC))
+BIN := $(BUILDROOT)/btlog.bin
+ELF := $(BUILDROOT)/btlog.elf
+
+all: btlog 
+.PHONY: all btlog
+
+btlog: $(BIN)
+
+$(BIN): $(ELF)
+	@echo generating image: $@
+	$(HIDE) $(OBJCOPY) -O binary $< $@
+ifneq ($(BUILDROOT),$(LOCAL_DIR)/out)
+	$(HIDE) install $@ $(BIN_DIR)/btlog.bin
+endif
+
+$(ELF): $(ASM_OBJ) $(C_OBJ) $(LKSCRIPT)
+	@echo linking $@
+	$(HIDE) $(LD) $(LDFLAGS) $(ASM_OBJ) $(C_OBJ) $(LIBGCC) -o $@
+	$(HIDE) $(SIZE) $@
+	@echo generating sorted symbols: $@.sym
+	$(HIDE) $(OBJDUMP) -t $@ | $(CPPFILT) | sort > $@.sym
+	@echo generating listing: $@.lst
+	$(HIDE) $(OBJDUMP) -d -S $@ | $(CPPFILT) > $@.lst
+	@echo generating dumping: $@.dump
+	$(HIDE) $(OBJDUMP) -s -x $@ | $(CPPFILT) > $@.dump
+
+$(ASM_OBJ): $(BUILDROOT)/%.o: $(LOCAL_DIR)/%.S $(MKFILE)
+	$(HIDE) $(MKDIR)
+	@echo compiling $(patsubst $(LOCAL_DIR)/%.S,%.S,$<)
+	$(HIDE) $(CC) $(ARCHFLAGS) $(CFLAGS) $(CFLAGS_VERSION) -c -o $@ $<
+
+$(C_OBJ): $(BUILDROOT)/%.o: $(LOCAL_DIR)/%.c $(MKFILE)
+	$(HIDE) $(MKDIR)
+	@echo compiling $(patsubst $(LOCAL_DIR)/%.c,%.c,$<)
+	$(HIDE) $(CC) $(ARCHFLAGS) $(CFLAGS) $(CFLAGS_VERSION) -c $< -MD -MP -MT $@ -o $@
+
+-include $(DEP)
+
+clean: btlog-clean
+.PHONY: clean btlog-clean
+
+distclean: clean
+.PHONY: distclean
+
+btlog-clean:
+	$(HIDE) rm -rf $(ASM_OBJ) $(C_OBJ) $(DEP) $(BLBIN) $(BLELF) $(BLELF).sym $(BLELF).lst $(BUILDROOT) $(BIN_DIR)/btlog.bin
+

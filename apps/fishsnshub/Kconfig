@@ -1,0 +1,29 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config APPS_FISHSNSHUB
+	tristate "APP FISHSNSHUB"
+	default n
+	---help---
+		Enable the \"fishsnshub\" app
+
+if APPS_FISHSNSHUB
+
+config APPS_FISHSNSHUB_PROGNAME
+	string "Program name"
+	default "fishsnshub"
+	---help---
+		This is the name of the program that will be use when the NSH ELF
+		program is installed.
+
+config APPS_FISHSNSHUB_PRIORITY
+	int "fishsnshub client task priority"
+	default 100
+
+config APPS_FISHSNSHUB_STACKSIZE
+	int "fishsnshub client stack size"
+	default 2048
+
+endif

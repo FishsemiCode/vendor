@@ -39,10 +39,15 @@ APPNAME = gpstest
 PRIORITY = CONFIG_GPSTEST_PRIORITY
 STACKSIZE = CONFIG_GPSTEST_STACKSIZE
 
-ASRCS   =
 MAINSRC = gpstest.c
+ifeq ($(CONFIG_GPSTEST_GUI),y)
+CSRCS += fbdev.c gpstest_gui.c tp_cal.c tp.c
+CSRCS += img_singal_0.c img_singal_1.c img_singal_2.c img_singal_3.c img_singal_4.c img_singal_5.c img_singal_null.c
+CSRCS += img_nb.c img_gps.c img_statistics.c img_no_sim.c img_sleep.c
+CSRCS += img_data_activity_in.c img_data_activity_out.c img_data_activity_null.c img_gps_activity.c
+CFLAGS += -I$(APPDIR)/graphics/littlevgl/lvgl
+endif
 
-CFLAGS_STR := "$(CFLAGS)"
 CFLAGS += -I $(TOPDIR)/../vendor/services/ril/at_client
 PROGNAME = gpstest$(EXEEXT)
 

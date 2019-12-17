@@ -32,4 +32,11 @@ config GPSTEST_AUTO_START
 	---help---
 	Start the gpstest automatically.
 
+config GPSTEST_GUI
+	bool "gpstest with gui"
+	default n
+	select GRAPHICS_LVGL
+	---help---
+	Gps test with GUI.
+
 endif # GPSTEST

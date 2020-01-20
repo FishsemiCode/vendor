@@ -119,6 +119,12 @@ typedef enum
   GPS_STATISTICS_COUNT,
 }GPS_STATISTICS;
 
+typedef enum
+{
+  GPS_ACTION_AFTER_NB_SENT_RADIO_POWEROFF,
+  GPS_ACTION_AFTER_NB_SENT_RRC_RELEASE,
+}GPS_ACTION_AFTER_NB_SENT;
+
 
 static char g_gps_data[MSS + 1];
 static int g_gps_flag;
@@ -169,6 +175,7 @@ static uint64_t g_rtc_Seconds;
 static uint32_t g_position_time;
 
 int g_positionDelaySeconds = 1;
+
 
 
 static void fillGpsInfo(GpsInfo *gpsInfo, uint32_t positionTime, char *time,
@@ -645,7 +652,7 @@ static int get_gps_info(int fd, int seconds, int nbSendInterval)
 }
 
 
-static int nb_send2server(int fd, const char *start_reason)
+static int nb_send2server(int fd, const char *start_reason, int actionAfterNbSent)
 {
   int sock_fd;
   struct sockaddr_in remote;
@@ -876,22 +883,32 @@ retry:
   close(sock_fd);
   ret = 0;
 clean:
-  if (set_radiopower(fd, false) < 0)
+  if (actionAfterNbSent == GPS_ACTION_AFTER_NB_SENT_RRC_RELEASE)
     {
-      syslog(LOG_ERR, "%s: set_radiopower fail\n", __func__);
-      increase_statistics(GPS_STATISTICS_STOP_NB_FAIL);
-      return ret;
+      if (release_signalconnection(fd) < 0)
+        {
+          syslog(LOG_ERR, "%s: release_signalconnection fail\n", __func__);
+        }
     }
-  pthread_mutex_lock(&g_nb_mutex);
-  g_reg_staus = 0;
-  pthread_mutex_unlock(&g_nb_mutex);
-  if (g_callback.serviceStateChanged)
+  else if (actionAfterNbSent == GPS_ACTION_AFTER_NB_SENT_RADIO_POWEROFF)
     {
-      ServiceState serviceState;
-      serviceState.regState = 0;
-      g_callback.serviceStateChanged(&serviceState);
+      if (set_radiopower(fd, false) < 0)
+        {
+          syslog(LOG_ERR, "%s: set_radiopower fail\n", __func__);
+          increase_statistics(GPS_STATISTICS_STOP_NB_FAIL);
+          return ret;
+        }
+      pthread_mutex_lock(&g_nb_mutex);
+      g_reg_staus = 0;
+      pthread_mutex_unlock(&g_nb_mutex);
+      if (g_callback.serviceStateChanged)
+        {
+          ServiceState serviceState;
+          serviceState.regState = 0;
+          g_callback.serviceStateChanged(&serviceState);
+        }
+      g_nbPowered = false;
     }
-  g_nbPowered = false;
   return ret;
 }
 
@@ -1196,6 +1213,9 @@ static int gps_service(int argc, char *argv[])
   SIM_STATUS simStatus;
   bool bHasGetOperInfo = false;
 #endif
+  int enterDs = 0;
+  int actionAfterNbSent = GPS_ACTION_AFTER_NB_SENT_RADIO_POWEROFF;
+
 
   const char *start_reason = getenv("START_REASON");
 
@@ -1256,7 +1276,14 @@ static int gps_service(int argc, char *argv[])
       gps_update_statistics(g_gps_statistics_path, GPS_STATISTICS_NB_START_TIME, currTime);
     }
 
-  if (argc == 3)
+  if (argc == 5)
+    {
+      seconds = atoi(argv[1]);
+      nbSendInterval = atoi(argv[2]);
+      enterDs = atoi(argv[3]);
+      actionAfterNbSent = atoi(argv[4]);
+    }
+  else if (argc == 3)
     {
       seconds = atoi(argv[1]);
       nbSendInterval = atoi(argv[2]);
@@ -1344,7 +1371,7 @@ static int gps_service(int argc, char *argv[])
               errCnt++;
               if (errCnt > 5)
                 {
-                  board_reset(3);
+                  board_reset(0);
                 }
               continue;
             }
@@ -1367,7 +1394,7 @@ static int gps_service(int argc, char *argv[])
                   regErrCnt++;
                   if (regErrCnt > 5)
                     {
-                      board_reset(3);
+                      board_reset(0);
                     }
                   break;
                 }
@@ -1384,12 +1411,12 @@ static int gps_service(int argc, char *argv[])
               regErrCnt = 0;
               pthread_mutex_unlock(&g_nb_mutex);
               // send data to NB
-              if ((success = nb_send2server(clientfd, start_reason)) < 0)
+              if ((success = nb_send2server(clientfd, start_reason, actionAfterNbSent)) < 0)
                 {
                   nbSentErrCnt++;
                   if (nbSentErrCnt > 5)
                     {
-                      board_reset(3);
+                      board_reset(0);
                     }
                 }
               else
@@ -1411,9 +1438,15 @@ static int gps_service(int argc, char *argv[])
           usleep(50000);
           gui_destory();
         #endif
-          pm_relax(PM_IDLE_DOMAIN, PM_STANDBY);
+          if (enterDs)
+            {
+              pm_relax(PM_IDLE_DOMAIN, PM_STANDBY);
+            }
           rtc_sleep(g_rtcfd, seconds - eclipseTime);
-          pm_stay(PM_IDLE_DOMAIN, PM_STANDBY);
+          if (enterDs)
+            {
+              pm_stay(PM_IDLE_DOMAIN, PM_STANDBY);
+            }
           if (g_callback.sleeping)
           {
             g_callback.sleeping(false);

@@ -343,6 +343,8 @@ static int gps_update_statistics(char *filePath, GPS_STATISTICS num, uint32_t va
       return -1;
     }
   g_gps_statistics_array[num] = value;
+  syslog(LOG_INFO, "%s: %d, %d\n",
+        __func__, num, value);
   close(fd);
 
   return 0;
@@ -812,7 +814,7 @@ retry:
             {
               g_callback.dataActivity(DATA_ACTIVITY_NONE);
             }
-          syslog(LOG_ERR, "%s: read gps info error:%d\r\n", __func__, readSize);
+          syslog(LOG_ERR, "%s: read gps info error:%d,%d,%d\r\n", __func__, readSize, sentSize, gps_info_offset);
           goto clean;
         }
       syslog(LOG_INFO, "%s: sent:%d,%s\r\n", __func__, readSize, g_gps_data);

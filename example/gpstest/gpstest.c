@@ -146,7 +146,7 @@ static bool g_gpsPowered = false;
 
 
 static unsigned char g_warm_start_location_max_time = 10;
-static char *g_gpsInfo_file_path = "/services/gpsInfo";
+static char *g_gpsInfo_file_path = "/data/gpsInfo";
 
 #if 0
 static int g_gps_test_case[][2] = {{180, 3600}, {120, 1800}, {900, 1800}};
@@ -156,7 +156,7 @@ static unsigned int g_gps_test_case_interval = 3600;
 static uint64_t g_gps_position_start_time = 0;
 static uint64_t g_gps_position_end_time = 0;
 
-static char *g_gps_statistics_path = "/services/gpsStatistics";
+static char *g_gps_statistics_path = "/data/gpsStatistics";
 static uint32_t g_gps_statistics_array[GPS_STATISTICS_COUNT];
 
 static GpsTestCallBack g_callback;

@@ -636,6 +636,8 @@ static int get_gps_info(int fd, int seconds, int nbSendInterval)
     {
       g_callback.gpsActivity(GPS_ACTIVITY_NONE);
     }
+
+  currTime = (uint32_t)(gettime() / 1000);
   if (currTime - g_gps_statistics_array[GPS_STATISTICS_NB_START_TIME] >= nbSendInterval || seconds == nbSendInterval)
     {
       // start NB

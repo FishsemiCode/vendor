@@ -1217,6 +1217,10 @@ static int gps_service(int argc, char *argv[])
 #endif
   int enterDs = 0;
   int actionAfterNbSent = GPS_ACTION_AFTER_NB_SENT_RADIO_POWEROFF;
+  uint32_t gpsTestCount = UINT32_MAX;
+  uint32_t nbTestCount = UINT32_MAX;
+  uint32_t gpsTestIndex = 1;
+  uint32_t nbTestIndex = 1;
 
 
   const char *start_reason = getenv("START_REASON");
@@ -1278,24 +1282,29 @@ static int gps_service(int argc, char *argv[])
       gps_update_statistics(g_gps_statistics_path, GPS_STATISTICS_NB_START_TIME, currTime);
     }
 
-  if (argc == 5)
-    {
-      seconds = atoi(argv[1]);
-      nbSendInterval = atoi(argv[2]);
-      enterDs = atoi(argv[3]);
-      actionAfterNbSent = atoi(argv[4]);
-    }
-  else if (argc == 3)
-    {
-      seconds = atoi(argv[1]);
-      nbSendInterval = atoi(argv[2]);
-    }
-  else if (argc == 2)
+  if (argc >= 2)
     {
       seconds = nbSendInterval = atoi(argv[1]);
+      if (argc >= 3)
+        {
+          nbSendInterval = atoi(argv[2]);
+          if (argc >= 5)
+            {
+              enterDs = atoi(argv[3]);
+              actionAfterNbSent = atoi(argv[4]);
+              if (argc >= 6)
+                {
+                  gpsTestCount = atoi(argv[5]);
+                  if (argc >= 7)
+                    {
+                      nbTestCount = atoi(argv[6]);
+                    }
+                }
+            }
+        }
     }
 
-  syslog(LOG_INFO, "gps interval:%d, nb sent interval:%d\n", seconds, nbSendInterval);
+  syslog(LOG_INFO, "gps interval:%d, nb sent interval:%d, gpsTestCount:%d, nbTestCount:%d\n", seconds, nbSendInterval, gpsTestCount, nbTestCount);
 
   pthread_mutex_init(&g_gps_mutex, NULL);
   pthread_cond_init(&g_gps_cond, NULL);
@@ -1368,6 +1377,10 @@ static int gps_service(int argc, char *argv[])
       // get GPS data
       if (g_gps_enable_flag == 1)
         {
+          if (gpsTestIndex++ > gpsTestCount)
+            {
+              break;
+            }
           if ((success = get_gps_info(clientfd, seconds, nbSendInterval)) < 0)
             {
               errCnt++;
@@ -1381,6 +1394,10 @@ static int gps_service(int argc, char *argv[])
         }
       if (g_nbPowered)
         {
+          if (nbTestIndex++ > nbTestCount)
+            {
+              break;
+            }
           pthread_mutex_lock(&g_nb_mutex);
           while (!is_registered(g_reg_staus))
             {

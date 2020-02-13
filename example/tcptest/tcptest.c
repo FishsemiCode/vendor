@@ -231,7 +231,8 @@ static void usage(void)
 {
   syslog(LOG_ERR, "Usage: tcptest [-a addr] [-p port]\n"
       "\t-a addr\t\tThe remote ip address\n"
-      "\t-p port\t\tThe remote port\n");
+      "\t-p port\t\tThe remote port\n"
+      "\t-c count\t\tTest count\n");
 }
 
 
@@ -246,6 +247,9 @@ int tcptest_main(int argc, char *argv[])
   int opt;
   int port = 0;
   char addr[INET6_ADDRSTRLEN];
+  uint32_t testCount = UINT32_MAX;
+  uint32_t index = 1;
+
   memset(addr, 0x0, sizeof(addr));
 
   if (argc < 3)
@@ -253,7 +257,7 @@ int tcptest_main(int argc, char *argv[])
       usage();
       exit(1);
     }
-  while ((opt = getopt(argc, argv, "a:p:")) != -1)
+  while ((opt = getopt(argc, argv, "a:p:c:")) != -1)
     {
       switch (opt)
         {
@@ -262,6 +266,9 @@ int tcptest_main(int argc, char *argv[])
             break;
           case 'p':
             port = atoi(optarg);
+            break;
+          case 'c':
+            testCount = atoi(optarg);
             break;
           default:
             usage();
@@ -301,7 +308,7 @@ int tcptest_main(int argc, char *argv[])
 
   get_nb_imei(clientfd);
 
-  while (1)
+  while (index++ <= testCount)
     {
       pthread_mutex_lock(&g_tcp_mutex);
       while (!is_registered(g_reg_staus))

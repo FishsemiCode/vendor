@@ -1,0 +1,23 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config VBATTEST
+	bool "VBATTEST"
+	default n
+	select SERVICES_RIL
+	---help---
+	Enable the VBATTEST
+
+if VBATTEST
+
+config VBATTEST_PRIORITY
+	int "VBATTest task priority"
+	default 100
+
+config VBATTEST_STACKSIZE
+	int "VBATTest stack size"
+	default 2048
+
+endif

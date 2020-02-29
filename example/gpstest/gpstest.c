@@ -1251,8 +1251,8 @@ static int gps_service(int argc, char *argv[])
     }
   if (strcmp(start_reason, "first_pon") == 0 || strcmp(start_reason, "button_rstn") == 0)
     {
-      g_gps_statistics_array[GPS_STATISTICS_GPS_INFO_SIZE] = 0;
-      g_gps_statistics_array[GPS_STATISTICS_GPS_INFO_OFFSET] = 0;
+      gps_update_statistics(g_gps_statistics_path, GPS_STATISTICS_GPS_INFO_SIZE, 0);
+      gps_update_statistics(g_gps_statistics_path, GPS_STATISTICS_GPS_INFO_OFFSET, 0);
       unlink(g_gpsInfo_file_path);
     }
 

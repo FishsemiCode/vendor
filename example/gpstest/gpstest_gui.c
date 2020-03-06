@@ -464,7 +464,7 @@ static void btn_event_handler(lv_obj_t * btn, lv_event_t event)
     if(event == LV_EVENT_PRESSED)
       {
         gps_clear_statistics();
-        syslog(0, "*****btxbtx button pressed\n");
+        syslog(LOG_INFO, "*****btxbtx button pressed\n");
       }
 }
 

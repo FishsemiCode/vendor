@@ -202,7 +202,7 @@ static uint64_t gettime(void)
   rtime = nxtime * 1000000000LL;
 #endif
   rtime = rtime / 1000 / 1000;
-  syslog(0, "%s:%llu\n", __func__, rtime);
+  syslog(LOG_INFO, "%s:%llu\n", __func__, rtime);
   return rtime;
 }
 

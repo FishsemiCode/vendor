@@ -145,7 +145,7 @@ static bool g_nbPowered = true;
 static bool g_gpsPowered = false;
 
 
-static unsigned char g_warm_start_location_max_time = 10;
+static unsigned char g_warm_start_location_max_time = 15;
 static char *g_gpsInfo_file_path = "/data/gpsInfo";
 
 #if 0
@@ -490,6 +490,7 @@ static int get_gps_info(int fd, int seconds, int nbSendInterval)
   struct timespec time;
   struct timeval now;
   uint32_t currTime;
+  bool bColdStart = false;
   currTime = (uint32_t)(gettime() / 1000);
   g_gps_position_start_time = gettime();
   g_gps_position_end_time = 0;
@@ -516,10 +517,17 @@ static int get_gps_info(int fd, int seconds, int nbSendInterval)
       g_nbPowered = false;
     }
 
+  if (g_gps_flag == 2 &&
+    getEclipseTime(g_gps_statistics_array[GPS_STATISTICS_GPS_EPHEMERIS_SAVE_TIME], currTime) > 60 * 60)
+    {
+      g_gps_flag = 0;
+      bColdStart = true;
+    }
+
   syslog(LOG_INFO, "%s: start gps\n", __func__);
   if (!g_gpsPowered)
     {
-      ret = start_gps(fd);
+      ret = start_gps(fd, bColdStart);
       if (ret < 0)
         {
           increase_statistics(GPS_STATISTICS_START_GPS_FAIL);
@@ -532,11 +540,7 @@ static int get_gps_info(int fd, int seconds, int nbSendInterval)
     {
       g_callback.gpsActivity(GPS_ACTIVITY_INOUT);
     }
-  if (g_gps_flag == 2 &&
-    getEclipseTime(g_gps_statistics_array[GPS_STATISTICS_GPS_EPHEMERIS_SAVE_TIME], currTime) > 60 * 60)
-    {
-      g_gps_flag = 0;
-    }
+
 
   // wait for GPS position data
   gettimeofday(&now, NULL);

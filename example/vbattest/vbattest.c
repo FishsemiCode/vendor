@@ -61,7 +61,7 @@
  * rtc_test
  ****************************************************************************/
 
-static int vbat_test(int times)
+static int vbat_test(int port, int times)
 {
   int ret;
   int clientfd;
@@ -79,9 +79,10 @@ static int vbat_test(int times)
     {
       int sum = 0;
       int cnt = 0;
+
       for (j = 0; j < 10; j++)
         {
-          ret = get_vbat(clientfd, &vbat);
+          ret = get_vbat(clientfd, port, &vbat);
           if (ret >= 0)
             {
               sum += vbat;
@@ -118,12 +119,12 @@ int main(int argc, FAR char *argv[])
 int vbattest_main(int argc, char *argv[])
 #endif
 {
-  if (argc != 2) {
-    printf("[usage]: vbattest [test times]\n");
+  if (argc != 3) {
+    printf("[usage]: vbattest [test port(0-2)] [test times]\n");
     return EXIT_SUCCESS;
   }
 
-  vbat_test(atoi(argv[1]));
+  vbat_test(atoi(argv[1]), atoi(argv[2]));
 
   return EXIT_SUCCESS;
 }

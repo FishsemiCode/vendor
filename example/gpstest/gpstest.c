@@ -1362,6 +1362,13 @@ static int gps_service(int argc, char *argv[])
       goto clean;
     }
 
+  ret = register_indication(clientfd, "$BDRMC", handle_gprmc);
+  if(ret < 0)
+    {
+      syslog(LOG_ERR, "%s: register_indication fail\n", __func__);
+      goto clean;
+    }
+
   ret = set_ceregindicationstatus(clientfd, 2);
   if (ret < 0)
     {

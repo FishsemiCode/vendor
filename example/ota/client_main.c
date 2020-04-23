@@ -194,12 +194,19 @@ static int save_patch_to_file(const uint8_t *imei, const uint8_t *packet,
 static int ota_get_version(char *buf)
 {
   struct utsname name;
+  char *p;
   if (uname(&name) == -1)
     {
       printf("uname fail\n");
       return -1;
     }
-  memcpy(buf, name.version, sizeof(name.version));
+  p = strchr(name.version, ' ');
+  if (p)
+    {
+      *p = '\0';
+    }
+
+  strcpy(buf, name.version);
   return 0;
 }
 

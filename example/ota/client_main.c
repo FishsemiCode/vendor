@@ -245,6 +245,10 @@ static int handle_ota_cmd(const char *msg, ssize_t len)
         printf("OTA_VERSION_RSP received, send OTA_DATA_HEADER_REQ\n");
         get_version_from_req_resp(msg, g_patch.new_version);
         printf("New version: %s\n", g_patch.new_version);
+        if (strcmp(g_patch.new_version, "INVALIDVER") == 0)
+          {
+            return 2;
+          }
         packet = create_ota_data_header_req_resp(imei,
             set_get_saved_length(OTA_DIR, &g_patch, &g_save, false), true);
         printf("current pos: %d\n", g_save.pos);
@@ -430,7 +434,7 @@ clean:
       printf("*****download successfully*******\n");
       up_reset(3);
     }
-  else if (retry_num++ < MAX_RETRY_NUM)
+  else if (ret != 2 && retry_num++ < MAX_RETRY_NUM)
     {
         printf("ota fail, retry:%d\n", retry_num);
         goto retry;

@@ -1201,6 +1201,14 @@ void gps_clear_statistics(void)
   pthread_mutex_unlock(&g_statistics_mutex);
 }
 
+static void gps_var_init(void)
+{
+  g_reg_staus = -1;
+  g_nbPowered = true;
+  g_gpsPowered = false;
+  g_gps_flag = 0;
+}
+
 static int gps_service(int argc, char *argv[])
 {
   int ret;
@@ -1228,6 +1236,7 @@ static int gps_service(int argc, char *argv[])
   uint32_t gpsTestIndex = 1;
   uint32_t nbTestIndex = 1;
 
+  gps_var_init();
 
   const char *start_reason = getenv("START_REASON");
 

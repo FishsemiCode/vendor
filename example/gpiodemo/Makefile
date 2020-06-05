@@ -42,6 +42,6 @@ PRIORITY  = $(CONFIG_GPIODEMO_PRIORITY)
 STACKSIZE = $(CONFIG_GPIODEMO_STACKSIZE)
 
 MAINSRC = gpiodemo.c
-PROGNAME = gpiodemo$(EXEEXT)
+PROGNAME = gpiodemo
 
 include $(APPDIR)/Application.mk

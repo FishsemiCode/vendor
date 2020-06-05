@@ -45,6 +45,6 @@ PRIORITY  = $(CONFIG_FISHDEMO_PRIORITY)
 STACKSIZE = $(CONFIG_FISHDEMO_STACKSIZE)
 
 MAINSRC = fishdemo.c
-PROGNAME = fishdemo$(EXEEXT)
+PROGNAME = fishdemo
 
 include $(APPDIR)/Application.mk

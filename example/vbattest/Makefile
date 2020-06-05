@@ -44,6 +44,6 @@ PRIORITY  = $(CONFIG_VBATTEST_PRIORITY)
 STACKSIZE = $(CONFIG_VBATTEST_STACKSIZE)
 
 MAINSRC = vbattest.c
-PROGNAME = vbattest$(EXEEXT)
+PROGNAME = vbattest
 CFLAGS += -I $(TOPDIR)/../vendor/services/ril/at_client
 include $(APPDIR)/Application.mk

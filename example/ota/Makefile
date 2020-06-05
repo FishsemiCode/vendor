@@ -40,5 +40,5 @@ MAINSRC = client_main.c
 CSRCS += client.c ota_utils.c
 CFLAGS_STR := "$(CFLAGS)"
 CFLAGS += -I $(TOPDIR)/../vendor/services/ril/at_client
-PROGNAME = otaclient(EXEEXT)
+PROGNAME = otaclient
 include $(APPDIR)/Application.mk

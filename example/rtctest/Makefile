@@ -45,6 +45,6 @@ PRIORITY  = $(CONFIG_RTCTEST_PRIORITY)
 STACKSIZE = $(CONFIG_RTCTEST_STACKSIZE)
 
 MAINSRC = rtctest.c
-PROGNAME = rtctest$(EXEEXT)
+PROGNAME = rtctest
 
 include $(APPDIR)/Application.mk

@@ -35,5 +35,5 @@
 ############################################################################
 
 ifeq ($(CONFIG_RTCTEST),y)
-CONFIGURED_APPS += external/example/rtctest
+CONFIGURED_APPS += $(APPDIR)/external/example/rtctest
 endif

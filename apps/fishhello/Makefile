@@ -45,6 +45,6 @@ PRIORITY  = $(CONFIG_APP_FISHHELLO_PRIORITY)
 STACKSIZE = $(CONFIG_APP_FISHHELLO_STACKSIZE)
 
 MAINSRC = fishhello.c
-PROGNAME = fishhello$(EXEEXT)
+PROGNAME = fishhello
 
 include $(APPDIR)/Application.mk

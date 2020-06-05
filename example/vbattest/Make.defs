@@ -34,5 +34,5 @@
 ############################################################################
 
 ifeq ($(CONFIG_VBATTEST),y)
-CONFIGURED_APPS += external/example/vbattest
+CONFIGURED_APPS += $(APPDIR)/external/example/vbattest
 endif

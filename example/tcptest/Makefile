@@ -42,6 +42,6 @@ MAINSRC = tcptest.c
 
 CFLAGS_STR := "$(CFLAGS)"
 CFLAGS += -I $(TOPDIR)/../vendor/services/ril/at_client
-PROGNAME = tcptest$(EXEEXT)
+PROGNAME = tcptest
 
 include $(APPDIR)/Application.mk

@@ -35,5 +35,5 @@
 ############################################################################
 
 ifeq ($(CONFIG_FISHDEMO),y)
-CONFIGURED_APPS += external/example/fishdemo
+CONFIGURED_APPS += $(APPDIR)/external/example/fishdemo
 endif

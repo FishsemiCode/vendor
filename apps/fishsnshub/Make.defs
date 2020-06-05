@@ -34,5 +34,5 @@
 ############################################################################
 
 ifneq ($(CONFIG_APPS_FISHSNSHUB),)
-CONFIGURED_APPS += external/apps/fishsnshub
+CONFIGURED_APPS += $(APPDIR)/external/apps/fishsnshub
 endif

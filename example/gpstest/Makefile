@@ -49,6 +49,6 @@ CFLAGS += -I$(APPDIR)/graphics/littlevgl/lvgl
 endif
 
 CFLAGS += -I $(TOPDIR)/../vendor/services/ril/at_client
-PROGNAME = gpstest$(EXEEXT)
+PROGNAME = gpstest
 
 include $(APPDIR)/Application.mk

@@ -34,5 +34,5 @@
 ############################################################################
 
 ifeq ($(CONFIG_GPSTEST),y)
-CONFIGURED_APPS += external/example/gpstest
+CONFIGURED_APPS += $(APPDIR)/external/example/gpstest
 endif

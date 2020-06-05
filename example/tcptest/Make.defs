@@ -33,5 +33,5 @@
 ############################################################################
 
 ifeq ($(CONFIG_TCPTEST),y)
-CONFIGURED_APPS += external/example/tcptest
+CONFIGURED_APPS += $(APPDIR)/external/example/tcptest
 endif

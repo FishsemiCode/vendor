@@ -42,5 +42,5 @@ MAINSRC = ril_test.c
 
 CFLAGS_STR := "$(CFLAGS)"
 CFLAGS += -I $(TOPDIR)/../vendor/services/ril/at_client
-PROGNAME = riltest(EXEEXT)
+PROGNAME = riltest
 include $(APPDIR)/Application.mk

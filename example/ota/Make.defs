@@ -36,5 +36,5 @@
 ############################################################################
 
 ifeq ($(CONFIG_OTA),y)
-CONFIGURED_APPS += external/example/ota
+CONFIGURED_APPS += $(APPDIR)/external/example/ota
 endif

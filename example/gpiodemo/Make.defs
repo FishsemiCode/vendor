@@ -34,5 +34,5 @@
 ############################################################################
 
 ifeq ($(CONFIG_GPIODEMO),y)
-CONFIGURED_APPS += external/example/gpiodemo
+CONFIGURED_APPS += $(APPDIR)/external/example/gpiodemo
 endif

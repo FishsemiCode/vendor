@@ -34,5 +34,5 @@
 #
 ############################################################################
 ifeq ($(CONFIG_RILTEST),y)
-CONFIGURED_APPS += external/example/riltest
+CONFIGURED_APPS += $(APPDIR)/external/example/riltest
 endif

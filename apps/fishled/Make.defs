@@ -34,5 +34,5 @@
 ############################################################################
 
 ifneq ($(CONFIG_APP_FISHLED),)
-CONFIGURED_APPS += external/apps/fishled
+CONFIGURED_APPS += $(APPDIR)/external/apps/fishled
 endif

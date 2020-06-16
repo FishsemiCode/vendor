@@ -282,11 +282,7 @@ static void thread_mq_test(void)
 #define SIGVALUE_INT 42
 
 static sem_t g_thread_sem;
-#ifdef CONFIG_CAN_PASS_STRUCTS
 static void thread_callback(union sigval value)
-#else
-static void thread_callback(FAR void *ptr)
-#endif
 {
   printf("timer callback!\n");
   sem_post(&g_thread_sem);
@@ -566,11 +562,7 @@ static void signal_test(void)
 
   printf("signaling: pid = %d, signo = %d, sigvalue = %d\n", waiterpid, WAKEUP_SIGNAL, SIGVALUE_INT);
   sigvalue.sival_int = SIGVALUE_INT;
-#ifdef CONFIG_CAN_PASS_STRUCTS
   status = sigqueue(waiterpid, WAKEUP_SIGNAL, sigvalue);
-#else
-  status = sigqueue(waiterpid, WAKEUP_SIGNAL, sigvalue.sival_ptr);
-#endif
   if (status != OK)
     {
       printf("sigqueue called failed!\n");

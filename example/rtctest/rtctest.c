@@ -60,17 +60,9 @@ static int g_rtc_received;
  * Private Function
  ****************************************************************************/
 
-#ifdef CONFIG_CAN_PASS_STRUCTS
 static void rtc_callbck(union sigval value)
-#else
-static void rtc_callbck(FAR void *sival_ptr)
-#endif
 {
-#ifdef CONFIG_CAN_PASS_STRUCTS
   int sival_int = value.sival_int;
-#else
-  int sival_int = (int)((intptr_t)sival_ptr);
-#endif
 
   printf("%s: Received value %d, post semaphore\n", __func__, sival_int);
 

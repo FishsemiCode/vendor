@@ -116,6 +116,12 @@ typedef enum
   GPS_STATISTICS_GPS_INFO_SIZE,
   GPS_STATISTICS_GPS_INFO_OFFSET,
   GPS_STATISTICS_GPS_EPHEMERIS_SAVE_TIME,
+  GPS_STATISTICS_PAR_SECONDS,
+  GPS_STATISTICS_PAR_NBSENDINTERVAL,
+  GPS_STATISTICS_PAR_ENTERDS,
+  GPS_STATISTICS_PAR_ACTIONAFTERNBSENT,
+  GPS_STATISTICS_PAR_GPSREMAINTESTCOUNT,
+  GPS_STATISTICS_PAR_NBREMAINTTESTCOUNT,
   GPS_STATISTICS_COUNT,
 }GPS_STATISTICS;
 
@@ -1268,6 +1274,15 @@ static int gps_service(int argc, char *argv[])
       gps_update_statistics(g_gps_statistics_path, GPS_STATISTICS_GPS_INFO_OFFSET, 0);
       unlink(g_gpsInfo_file_path);
     }
+  if (strcmp(start_reason, "first_pon") == 0 || strcmp(start_reason, "button_rstn") == 0 || strcmp(start_reason, "soft_rstn") == 0)
+    {
+      gps_update_statistics(g_gps_statistics_path, GPS_STATISTICS_PAR_SECONDS, 0);
+      gps_update_statistics(g_gps_statistics_path, GPS_STATISTICS_PAR_NBSENDINTERVAL, 0);
+      gps_update_statistics(g_gps_statistics_path, GPS_STATISTICS_PAR_ENTERDS, 0);
+      gps_update_statistics(g_gps_statistics_path, GPS_STATISTICS_PAR_ACTIONAFTERNBSENT, 0);
+      gps_update_statistics(g_gps_statistics_path, GPS_STATISTICS_PAR_GPSREMAINTESTCOUNT, 0);
+      gps_update_statistics(g_gps_statistics_path, GPS_STATISTICS_PAR_NBREMAINTTESTCOUNT, 0);
+    }
 
   curTestCase = g_gps_statistics_array[GPS_STATISTICS_TEST_CASE_NUM];
   testCaseStartTime = g_gps_statistics_array[GPS_STATISTICS_TEST_CASE_START_TIME];
@@ -1316,6 +1331,40 @@ static int gps_service(int argc, char *argv[])
                     }
                 }
             }
+        }
+    }
+
+  if(g_gps_statistics_array[GPS_STATISTICS_PAR_GPSREMAINTESTCOUNT] > 0)
+    {
+      seconds           = g_gps_statistics_array[GPS_STATISTICS_PAR_SECONDS];
+      nbSendInterval    = g_gps_statistics_array[GPS_STATISTICS_PAR_NBSENDINTERVAL];
+      enterDs           = g_gps_statistics_array[GPS_STATISTICS_PAR_ENTERDS];
+      actionAfterNbSent = g_gps_statistics_array[GPS_STATISTICS_PAR_ACTIONAFTERNBSENT];
+      gpsTestCount      = g_gps_statistics_array[GPS_STATISTICS_PAR_GPSREMAINTESTCOUNT];
+      nbTestCount       = g_gps_statistics_array[GPS_STATISTICS_PAR_NBREMAINTTESTCOUNT];
+
+      syslog(LOG_INFO, "statistics seconds:%d\n", seconds);
+      syslog(LOG_INFO, "statistics nbSendInterval:%d\n", nbSendInterval);
+      syslog(LOG_INFO, "statistics enterDs:%d\n", enterDs);
+      syslog(LOG_INFO, "statistics actionAfterNbSent:%d\n", actionAfterNbSent);
+      syslog(LOG_INFO, "statistics gpsTestCount:%d\n", gpsTestCount);
+      syslog(LOG_INFO, "statistics nbTestCount:%d\n", nbTestCount);
+    }
+  else
+    {
+      if(seconds <= 0)
+        {
+          syslog(LOG_INFO, "%s: seconds <= 0, goto clean\n", __func__);
+          goto clean;
+        }
+      else
+        {
+          gps_update_statistics(g_gps_statistics_path, GPS_STATISTICS_PAR_SECONDS, seconds);
+          gps_update_statistics(g_gps_statistics_path, GPS_STATISTICS_PAR_NBSENDINTERVAL, nbSendInterval);
+          gps_update_statistics(g_gps_statistics_path, GPS_STATISTICS_PAR_ENTERDS, enterDs);
+          gps_update_statistics(g_gps_statistics_path, GPS_STATISTICS_PAR_ACTIONAFTERNBSENT, actionAfterNbSent);
+          gps_update_statistics(g_gps_statistics_path, GPS_STATISTICS_PAR_GPSREMAINTESTCOUNT, gpsTestCount);
+          gps_update_statistics(g_gps_statistics_path, GPS_STATISTICS_PAR_NBREMAINTTESTCOUNT, nbTestCount);
         }
     }
 
@@ -1403,6 +1452,8 @@ static int gps_service(int argc, char *argv[])
             {
               break;
             }
+          gps_update_statistics(g_gps_statistics_path, GPS_STATISTICS_PAR_GPSREMAINTESTCOUNT, gpsTestCount - gpsTestIndex + 1);
+          syslog(LOG_INFO, "gps remain count:%d\n", gpsTestCount - gpsTestIndex + 1);
           if ((success = get_gps_info(clientfd, seconds, nbSendInterval)) < 0)
             {
               errCnt++;
@@ -1420,6 +1471,8 @@ static int gps_service(int argc, char *argv[])
             {
               break;
             }
+          gps_update_statistics(g_gps_statistics_path, GPS_STATISTICS_PAR_NBREMAINTTESTCOUNT, nbTestCount - nbTestIndex + 1);
+          syslog(LOG_INFO, "nb remain count:%d\n", nbTestCount - nbTestIndex + 1 );
           pthread_mutex_lock(&g_nb_mutex);
           while (!is_registered(g_reg_staus))
             {
@@ -1519,6 +1572,7 @@ int gpstest_main(int argc, char *argv[])
   gui_create(&g_callback);
 #endif
   gps_service(argc, argv);
+  pm_relax(PM_IDLE_DOMAIN, PM_STANDBY);
   return EXIT_SUCCESS;
 }
 

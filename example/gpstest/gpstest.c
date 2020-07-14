@@ -390,7 +390,7 @@ static int get_curr_oper_info(int fd)
       syslog(LOG_ERR, "%s: get_currentoper fail\n", __func__);
       return -1;
     }
-  syslog(LOG_ERR, "%s: after\n", __func__);
+  syslog(LOG_INFO, "%s: after\n", __func__);
   if (g_callback.currOperInfo)
     {
       g_callback.currOperInfo(&curr_oper);
@@ -1119,7 +1119,7 @@ static void handle_gprmc(const char *s)
       seconds = mktime(&t);
       strncpy(buf, p_time + 7, 2);
       mSeconds = (uint64_t)(seconds) * 1000 + atoi(buf);
-      syslog(LOG_ERR, "%s: %d,%s,%s,%s,%s,%013llu,%u\n", __func__, ready, p_time, p_latitude, p_longitude, date, mSeconds, seconds);
+      syslog(LOG_INFO, "%s: %d,%s,%s,%s,%s,%013llu,%u\n", __func__, ready, p_time, p_latitude, p_longitude, date, mSeconds, seconds);
       pthread_mutex_lock(&g_gps_mutex);
       if (g_gps_flag == 0)
         {
@@ -1521,7 +1521,7 @@ static int gps_service(int argc, char *argv[])
         }
 
       eclipseTime = getEclipseTime(currTime, (uint32_t)(gettime() / 1000));
-      syslog(LOG_ERR, "gps nb cost time:%d\n", eclipseTime);
+      syslog(LOG_INFO, "gps nb cost time:%d\n", eclipseTime);
       if (eclipseTime <= seconds)
         {
         if (g_callback.sleeping)
@@ -1559,7 +1559,7 @@ clean:
   pthread_mutex_destroy(&g_nb_mutex);
   pthread_cond_destroy(&g_nb_cond);
   pthread_mutex_destroy(&g_statistics_mutex);
-  syslog(LOG_ERR, "%s: quit\n", __func__);
+  syslog(LOG_INFO, "%s: quit\n", __func__);
   return -1;
 }
 

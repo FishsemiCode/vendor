@@ -961,8 +961,13 @@ static void handle_cereg(const char *s)
         }
     }
   pthread_mutex_lock(&g_nb_mutex);
+  //Only the timer is released, after the registration is successful
+  if(is_registered(serviceState.regState))
+    {
+      pthread_cond_signal(&g_nb_cond);
+    }
+
   g_reg_staus = serviceState.regState;
-  pthread_cond_signal(&g_nb_cond);
   pthread_mutex_unlock(&g_nb_mutex);
   if (g_callback.serviceStateChanged)
     {

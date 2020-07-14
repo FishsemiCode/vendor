@@ -1518,6 +1518,18 @@ static int gps_service(int argc, char *argv[])
                   nbSentErrCnt = 0;
                 }
             }
+          else
+            {
+              if (set_radiopower(clientfd, false) < 0)
+                {
+                  syslog(LOG_ERR, "%s: set_radiopower fail\n", __func__);
+                  increase_statistics(GPS_STATISTICS_STOP_NB_FAIL);
+                }
+              else
+                {
+                  g_nbPowered = false;
+                }
+            }
         }
 
       eclipseTime = getEclipseTime(currTime, (uint32_t)(gettime() / 1000));

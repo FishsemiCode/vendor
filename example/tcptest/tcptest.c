@@ -229,10 +229,11 @@ static void handle_cereg(const char *s)
 
 static void usage(void)
 {
-  syslog(LOG_ERR, "Usage: tcptest [-a addr] [-p port]\n"
+  syslog(LOG_ERR, "Usage: tcptest [-a addr] [-p port] [-c count] [-i interval]\n"
       "\t-a addr\t\tThe remote ip address\n"
       "\t-p port\t\tThe remote port\n"
-      "\t-c count\t\tTest count\n");
+      "\t-c count\t\tTest count\n"
+      "\t-i interval\t\tTest interval\n");
 }
 
 
@@ -248,6 +249,7 @@ int tcptest_main(int argc, char *argv[])
   int port = 0;
   char addr[INET6_ADDRSTRLEN];
   uint32_t testCount = UINT32_MAX;
+  uint32_t testInterval = UINT32_MAX;    //test time interval, unit:second
   uint32_t index = 1;
 
   memset(addr, 0x0, sizeof(addr));
@@ -257,7 +259,7 @@ int tcptest_main(int argc, char *argv[])
       usage();
       exit(1);
     }
-  while ((opt = getopt(argc, argv, "a:p:c:")) != -1)
+  while ((opt = getopt(argc, argv, "a:p:c:i:")) != -1)
     {
       switch (opt)
         {
@@ -269,6 +271,9 @@ int tcptest_main(int argc, char *argv[])
             break;
           case 'c':
             testCount = atoi(optarg);
+            break;
+          case 'i':
+            testInterval = atoi(optarg);
             break;
           default:
             usage();
@@ -318,7 +323,7 @@ int tcptest_main(int argc, char *argv[])
       pthread_mutex_unlock(&g_tcp_mutex);
       // send data to NB
       nb_send2server(clientfd, addr, port);
-      usleep(5000000);
+      usleep(testInterval * 1000000);
     }
 
 clean:

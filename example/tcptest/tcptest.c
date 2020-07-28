@@ -196,7 +196,7 @@ static int tcp_get_statistics(char *filePath)
       i = 0;
       while ((p = strsep(&bufBak, ";")) && i < TCP_STATISTICS_COUNT)
         {
-          syslog(LOG_INFO, "%s: %s %d\n", __func__, p, i);
+          //syslog(LOG_INFO, "%s: %s %d\n", __func__, p, i);
           strcpy(g_tcp_statistics_array[i], p);
           i++;
         }

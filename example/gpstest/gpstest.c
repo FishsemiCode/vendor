@@ -316,7 +316,7 @@ static int gps_get_statistics(char *filePath)
       i = 0;
       while ((p = strsep(&bufBak, ";")) && i < GPS_STATISTICS_COUNT)
         {
-          syslog(LOG_ERR, "%s: %s %d\n", __func__, p, i);
+          //syslog(LOG_INFO, "%s: %s %d\n", __func__, p, i);
           g_gps_statistics_array[i] = atoi(p);
           i++;
         }

@@ -410,7 +410,10 @@ static void handle_cereg(const char *s)
     }
   pthread_mutex_lock(&g_tcp_mutex);
   g_reg_staus = value;
-  pthread_cond_signal(&g_tcp_cond);
+  if(is_registered(g_reg_staus))
+  {
+    pthread_cond_signal(&g_tcp_cond);
+  }
   pthread_mutex_unlock(&g_tcp_mutex);
 }
 
@@ -443,6 +446,8 @@ int tcptest_main(int argc, char *argv[])
   uint32_t dsmode = UINT32_MAX;                //DS mode
   uint32_t actionafternbsent = UINT32_MAX;     //Action After Nb Sent
   uint32_t index = 1;
+  struct timeval now;
+  struct timespec time;
 
   int rtcfd = open("/dev/rtc0", 0);
   if(rtcfd < 0)
@@ -612,27 +617,49 @@ int tcptest_main(int argc, char *argv[])
       pthread_mutex_lock(&g_tcp_mutex);
       while (!is_registered(g_reg_staus))
         {
-          pthread_cond_wait(&g_tcp_cond, &g_tcp_mutex);
+          gettimeofday(&now, NULL);
+          time.tv_sec = now.tv_sec + 80;
+          time.tv_nsec = now.tv_usec * 1000;
+          ret = pthread_cond_timedwait(&g_tcp_cond, &g_tcp_mutex, &time);
+          if (ret != 0)
+            {
+              syslog(LOG_ERR, "reg fail, timeout\n");
+              break;
+            }
         }
       pthread_mutex_unlock(&g_tcp_mutex);
 
-      // send data to NB
-      nb_send2server(clientfd, addr, port);
-      if(actionafternbsent == 0)
+      if(is_registered(g_reg_staus))
       {
-        if (set_radiopower(clientfd, false) < 0)
+        // send data to NB
+        nb_send2server(clientfd, addr, port);
+
+        if(actionafternbsent == 0)
         {
-          syslog(LOG_ERR, "%s: set_radiopower false fail\n", __func__);
-          pm_relax(PM_IDLE_DOMAIN, PM_STANDBY);
-          return ret;
+          if (set_radiopower(clientfd, false) < 0)
+          {
+            syslog(LOG_ERR, "%s: set_radiopower false fail\n", __func__);
+            pm_relax(PM_IDLE_DOMAIN, PM_STANDBY);
+            return ret;
+          }
+        }
+        else if(actionafternbsent == 1)
+        {
+          if (release_signalconnection(clientfd) < 0)
+          {
+            syslog(LOG_ERR, "%s: release_signalconnection fail\n", __func__);
+          }
         }
       }
-      else if(actionafternbsent == 1)
+      else
       {
-        if (release_signalconnection(clientfd) < 0)
-        {
-          syslog(LOG_ERR, "%s: release_signalconnection fail\n", __func__);
-        }
+          syslog(LOG_INFO, "%s: reg fail, set_radiopower false\n", __func__);
+          if (set_radiopower(clientfd, false) < 0)
+          {
+            syslog(LOG_ERR, "%s: set_radiopower false fail\n", __func__);
+            pm_relax(PM_IDLE_DOMAIN, PM_STANDBY);
+            return ret;
+          }
       }
 
       if (dsmode)

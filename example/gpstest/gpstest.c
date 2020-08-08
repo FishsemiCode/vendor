@@ -1223,7 +1223,7 @@ static void gps_var_init(void)
 static int gps_service(int argc, char *argv[])
 {
   int ret;
-  int clientfd;
+  int clientfd = -1;
   int errCnt = 0;
   int regErrCnt = 0;
   int nbSentErrCnt = 0;
@@ -1263,6 +1263,7 @@ static int gps_service(int argc, char *argv[])
   if (gps_get_statistics(g_gps_statistics_path) != 0)
     {
       syslog(LOG_INFO, "%s: get stattistics error\n", __func__);
+      close(g_rtcfd);
       return -1;
     }
   notify_statistics();
@@ -1360,7 +1361,8 @@ static int gps_service(int argc, char *argv[])
       if(seconds <= 0)
         {
           syslog(LOG_INFO, "%s: seconds <= 0, goto clean\n", __func__);
-          goto clean;
+          close(g_rtcfd);
+          return -1;
         }
       else
         {
@@ -1570,7 +1572,10 @@ clean:
     {
       close(g_rtcfd);
     }
-  at_client_close(clientfd);
+  if (clientfd >= 0)
+    {
+      at_client_close(clientfd);
+    }
   pthread_mutex_destroy(&g_gps_mutex);
   pthread_cond_destroy(&g_gps_cond);
   pthread_mutex_destroy(&g_nb_mutex);

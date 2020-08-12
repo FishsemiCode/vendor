@@ -1,0 +1,22 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+menuconfig EXAMPLES_UIDEMO
+	tristate "UI Library Demo"
+	default n
+	---help---
+		Enable build the UI Library Demo programs
+
+if EXAMPLES_UIDEMO
+
+config EXAMPLES_UIDEMO_PRIORITY
+	int "ui task priority"
+	default 100
+
+config EXAMPLES_UIDEMO_STACKSIZE
+	int "uidemo stack size"
+	default 16384
+
+endif

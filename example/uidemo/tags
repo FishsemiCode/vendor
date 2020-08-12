@@ -1,0 +1,53 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+EXTERN	demo.h	64;"	d
+EXTERN	demo.h	68;"	d
+EXTERN	demo.h	89;"	d
+FBDEV_PATH	fbdev.c	64;"	d	file:
+LVGLDIR	Makefile	/^LVGLDIR=$(APPDIR)\/graphics\/littlevgl\/lvgl$/;"	m
+LV_ATTRIBUTE_MEM_ALIGN	img_bubble_pattern.c	44;"	d	file:
+LV_DEMO_SLIDE_SHOW	demo.h	54;"	d
+LV_DEMO_SLIDE_SHOW	demo.h	56;"	d
+LV_DEMO_WALLPAPER	demo.h	48;"	d
+LV_DEMO_WALLPAPER	demo.h	50;"	d
+MAINSRC	Makefile	/^MAINSRC = uidemo.c$/;"	m
+MODULE	Makefile	/^MODULE = $(CONFIG_EXAMPLES_UIDEMO)$/;"	m
+PRIORITY	Makefile	/^PRIORITY = $(CONFIG_EXAMPLES_UIDEMO_PRIORITY)$/;"	m
+PROGNAME	Makefile	/^PROGNAME = uidemo$/;"	m
+STACKSIZE	Makefile	/^STACKSIZE = $(CONFIG_EXAMPLES_UIDEMO_STACKSIZE)$/;"	m
+__APPS_EXAMPLES_LVGLDEMO_DEMO_H	demo.h	33;"	d
+__APPS_EXAMPLES_LVGLDEMO_FBDEV_H	fbdev.h	37;"	d
+attr	fbdev.c	/^  struct ili9486_lcd_attributes_s attr;$/;"	m	struct:fb_state_s	typeref:struct:fb_state_s::ili9486_lcd_attributes_s	file:
+chart	demo.c	/^FAR static lv_obj_t *chart;$/;"	v	file:
+chart_create	demo.c	/^static void chart_create(lv_obj_t *parent)$/;"	f	file:
+demo_create	demo.c	/^void demo_create(void)$/;"	f
+fb_state_s	fbdev.c	/^struct fb_state_s$/;"	s	file:
+fbdev_fill	fbdev.c	/^void fbdev_fill(struct _disp_drv_t *disp_drv,$/;"	f
+fbdev_flush	fbdev.c	/^void fbdev_flush(struct _disp_drv_t *disp_drv, const lv_area_t *area,$/;"	f
+fbdev_init	fbdev.c	/^int fbdev_init(void)$/;"	f
+fbdev_map	fbdev.c	/^void fbdev_map(struct _disp_drv_t *disp_drv,$/;"	f
+fd	fbdev.c	/^  int fd;$/;"	m	struct:fb_state_s	file:
+ili9486_lcd_flush	fbdev.c	/^static int ili9486_lcd_flush(int fd, int len, uint16_t *matrix)$/;"	f	file:
+img_bubble_pattern	img_bubble_pattern.c	/^lv_img_dsc_t img_bubble_pattern =$/;"	v
+img_bubble_pattern_map	img_bubble_pattern.c	/^static const LV_ATTRIBUTE_MEM_ALIGN uint8_t img_bubble_pattern_map[] =$/;"	v	file:
+kb	demo.c	/^FAR static lv_obj_t *kb;$/;"	v	file:
+kb_hide_anim_end	demo.c	/^static void kb_hide_anim_end(lv_anim_t *a)$/;"	f	file:
+keyboard_event_cb	demo.c	/^static void keyboard_event_cb(lv_obj_t *keyboard, lv_event_t event)$/;"	f	file:
+list_btn_event_handler	demo.c	/^static void list_btn_event_handler(lv_obj_t * btn, lv_event_t event)$/;"	f	file:
+list_create	demo.c	/^static void list_create(lv_obj_t *parent)$/;"	f	file:
+main	uidemo.c	/^int main(int argc, FAR char *argv[])$/;"	f
+mbox_btns	demo.c	/^static const char *mbox_btns[] =$/;"	v	file:
+slider_event_handler	demo.c	/^static void slider_event_handler(lv_obj_t *slider, lv_event_t event)$/;"	f	file:
+state	fbdev.c	/^struct fb_state_s state;$/;"	v	typeref:struct:fb_state_s
+style_kb	demo.c	/^static lv_style_t style_kb;$/;"	v	file:
+style_kb_pr	demo.c	/^static lv_style_t style_kb_pr;$/;"	v	file:
+style_kb_rel	demo.c	/^static lv_style_t style_kb_rel;$/;"	v	file:
+ta	demo.c	/^FAR static lv_obj_t *ta;$/;"	v	file:
+tab_switcher	demo.c	/^static void tab_switcher(lv_task_t *task)$/;"	f	file:
+text_area_event_handler	demo.c	/^static void text_area_event_handler(lv_obj_t *text_area, lv_event_t event)$/;"	f	file:
+tick_func	uidemo.c	/^static FAR void *tick_func(void *data)$/;"	f	file:
+write_create	demo.c	/^static void write_create(lv_obj_t *parent)$/;"	f	file:

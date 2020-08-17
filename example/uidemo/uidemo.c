@@ -48,6 +48,9 @@
 #include <time.h>
 
 #include <graphics/lvgl.h>
+#if LV_USE_FILESYSTEM
+#include "fsdev.h"
+#endif
 #include "fbdev.h"
 #include "demo.h"
 
@@ -128,8 +131,10 @@ int main(int argc, FAR char *argv[])
 {
   lv_disp_drv_t disp_drv;
   pthread_t tick_thread;
-
   lv_disp_buf_t disp_buf;
+#if LV_USE_FILESYSTEM
+  lv_fs_drv_t fs_drv;
+#endif
   static lv_color_t buf[CONFIG_LV_VDB_SIZE];
 
   /* LittlevGL initialization */
@@ -147,6 +152,29 @@ int main(int argc, FAR char *argv[])
   disp_drv.flush_cb = fbdev_flush;
   disp_drv.buffer = &disp_buf;
   lv_disp_drv_register(&disp_drv);
+
+#if LV_USE_FILESYSTEM
+  lv_fs_drv_init(&fs_drv);
+  fs_drv.letter = '0';
+  fs_drv.file_size = sizeof(int);
+  fs_drv.rddir_size = 0;
+  fs_drv.ready_cb = fsdev_ready;
+  fs_drv.open_cb = fsdev_open;
+  fs_drv.close_cb = fsdev_close;
+  fs_drv.read_cb = fsdev_read;
+  fs_drv.write_cb = fsdev_write;
+  fs_drv.seek_cb = fsdev_seek;
+  fs_drv.tell_cb = fsdev_tell;
+  fs_drv.trunc_cb = fsdev_trunc;
+  fs_drv.size_cb = fsdev_size;
+  fs_drv.rename_cb = fsdev_rename;
+  fs_drv.dir_open_cb = fsdev_dir_open;
+  fs_drv.dir_read_cb = fsdev_dir_read;
+  fs_drv.dir_close_cb = fsdev_dir_close;
+  fs_drv.free_space_cb = fsdev_free_space;
+  lv_fs_drv_register(&fs_drv);
+  printf("littlevgl filesystem supported.\n");
+#endif
 
   /* Tick interface initialization */
 

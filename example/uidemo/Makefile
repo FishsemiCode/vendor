@@ -48,6 +48,7 @@ MODULE = $(CONFIG_EXAMPLES_UIDEMO)
 
 CSRCS += demo.c
 CSRCS += fbdev.c
+CSRCS += fsdev.c
 CSRCS += img_bubble_pattern.c
 
 MAINSRC = uidemo.c

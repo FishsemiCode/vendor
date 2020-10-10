@@ -1551,15 +1551,18 @@ static int gps_service(int argc, char *argv[])
           usleep(50000);
           gui_destory();
         #endif
-          if (enterDs)
+          if (eclipseTime <= seconds - 10)
+          {
+            if (enterDs)
             {
               pm_relax(PM_IDLE_DOMAIN, PM_STANDBY);
             }
-          rtc_sleep(g_rtcfd, seconds - eclipseTime);
-          if (enterDs)
+            rtc_sleep(g_rtcfd, seconds - eclipseTime);
+            if (enterDs)
             {
               pm_stay(PM_IDLE_DOMAIN, PM_STANDBY);
             }
+          }
           if (g_callback.sleeping)
           {
             g_callback.sleeping(false);

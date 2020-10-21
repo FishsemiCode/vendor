@@ -650,6 +650,11 @@ int tcptest_main(int argc, char *argv[])
             syslog(LOG_ERR, "%s: release_signalconnection fail\n", __func__);
           }
         }
+
+        if(testCount == 1)
+        {
+          goto clean;
+        }
       }
       else
       {

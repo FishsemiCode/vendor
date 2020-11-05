@@ -1243,7 +1243,7 @@ static int gps_service(int argc, char *argv[])
   int enterDs = 0;
   int actionAfterNbSent = GPS_ACTION_AFTER_NB_SENT_RADIO_POWEROFF;
   uint32_t gpsTestCount = UINT32_MAX;
-  uint32_t nbTestCount = UINT32_MAX;
+  int32_t nbTestCount = INT32_MAX;
   uint32_t gpsTestIndex = 1;
   uint32_t nbTestIndex = 1;
 
@@ -1472,7 +1472,7 @@ static int gps_service(int argc, char *argv[])
             }
           errCnt = 0;
         }
-      if (g_nbPowered)
+      if (g_nbPowered && (nbTestCount >= 0))
         {
           if (nbTestIndex++ > nbTestCount)
             {

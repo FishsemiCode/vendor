@@ -52,6 +52,7 @@
 #include <sched.h>
 #include <string.h>
 #include <strings.h>
+#include <time.h>
 
 #include <sys/socket.h>
 #include <arpa/inet.h>
@@ -131,7 +132,6 @@ typedef enum
   GPS_ACTION_AFTER_NB_SENT_RRC_RELEASE,
 }GPS_ACTION_AFTER_NB_SENT;
 
-
 static char g_gps_data[MSS + 1];
 static int g_gps_flag;
 static int g_reg_staus = -1;
@@ -144,23 +144,16 @@ static pthread_cond_t g_nb_cond;
 
 static unsigned char g_imei_value[IMEI_LENGTH + 1];
 
-
 static unsigned char g_gps_timeout = 60;
 
 static bool g_nbPowered = true;
 static bool g_gpsPowered = false;
 
-
 static unsigned char g_warm_start_location_max_time = 15;
 static char *g_gpsInfo_file_path = "/data/gpsInfo";
 
-#if 0
-static int g_gps_test_case[][2] = {{180, 3600}, {120, 1800}, {900, 1800}};
-static unsigned int g_gps_test_case_interval = 3600;
-#endif
-
-static uint64_t g_gps_position_start_time = 0;
-static uint64_t g_gps_position_end_time = 0;
+static uint32_t g_gps_position_start_time = 0;
+static uint32_t g_gps_position_end_time = 0;
 
 static char *g_gps_statistics_path = "/data/gpsStatistics";
 static uint32_t g_gps_statistics_array[GPS_STATISTICS_COUNT];
@@ -182,8 +175,6 @@ static uint32_t g_position_time;
 
 int g_positionDelaySeconds = 1;
 
-
-
 static void fillGpsInfo(GpsInfo *gpsInfo, uint32_t positionTime, char *time,
   char *longitude, char *latitude, char *date)
 {
@@ -195,21 +186,12 @@ static void fillGpsInfo(GpsInfo *gpsInfo, uint32_t positionTime, char *time,
   gpsInfo->positionTime = positionTime;
 }
 
-static uint64_t gettime(void)
+static uint32_t gettime(void)
 {
-  struct rtc_time curtime;
-  time_t nxtime;
-  uint64_t rtime = 0;
-  ioctl(g_rtcfd, RTC_RD_TIME, (unsigned long)&curtime);
-  nxtime = mktime((FAR struct tm *)&curtime);
-#if defined(CONFIG_RTC_HIRES) || defined(CONFIG_ARCH_HAVE_RTC_SUBSECONDS)
-  rtime = nxtime * 1000000000LL + curtime.tm_nsec;
-#else
-  rtime = nxtime * 1000000000LL;
-#endif
-  rtime = rtime / 1000 / 1000;
-  syslog(LOG_INFO, "%s:%llu\n", __func__, rtime);
-  return rtime;
+  struct timespec t;
+  clock_gettime(CLOCK_MONOTONIC, &t);
+  syslog(LOG_INFO, "%s:%d\n", __func__, t.tv_sec);
+  return t.tv_sec;
 }
 
 static uint32_t getEclipseTime(uint32_t startTime, uint32_t endTime)
@@ -497,7 +479,7 @@ static int get_gps_info(int fd, int seconds, int nbSendInterval)
   struct timeval now;
   uint32_t currTime;
   bool bColdStart = false;
-  currTime = (uint32_t)(gettime() / 1000);
+  currTime = gettime();
   g_gps_position_start_time = gettime();
   g_gps_position_end_time = 0;
 
@@ -573,7 +555,7 @@ static int get_gps_info(int fd, int seconds, int nbSendInterval)
         getEclipseTime(g_gps_statistics_array[GPS_STATISTICS_GPS_EPHEMERIS_SAVE_TIME], currTime) > 60 * 60) &&
         bNeedSaveEphemerics)
         {
-          uint32_t sleepSeconds = getEclipseTime(g_gps_position_start_time / 1000, g_gps_position_end_time / 1000);
+          uint32_t sleepSeconds = getEclipseTime(g_gps_position_start_time, g_gps_position_end_time);
 
           if (sleepSeconds >= 45)
             {
@@ -647,7 +629,7 @@ static int get_gps_info(int fd, int seconds, int nbSendInterval)
       g_callback.gpsActivity(GPS_ACTIVITY_NONE);
     }
 
-  currTime = (uint32_t)(gettime() / 1000);
+  currTime = gettime();
   if (currTime - g_gps_statistics_array[GPS_STATISTICS_NB_START_TIME] >= nbSendInterval || seconds == nbSendInterval)
     {
       // start NB
@@ -678,8 +660,8 @@ static int nb_send2server(int fd, const char *start_reason, int actionAfterNbSen
   int readSize;
   int sentSize = 0;
   at_api_cellinfo cellinfo;
-  uint64_t nb_sent_time = 0;
-  uint64_t nb_ack_recv_time = 0;
+  uint32_t nb_sent_time = 0;
+  uint32_t nb_ack_recv_time = 0;
   uint32_t nb_sent_interval = 0;
   uint32_t nb_sent_count = 0;
   uint32_t gps_info_offset;
@@ -735,17 +717,6 @@ retry:
       close(sock_fd);
       goto retry;
     }
-#if 0
-  ling.l_onoff  = 1;
-  ling.l_linger = 5;     /* timeout is seconds */
-
-  if (setsockopt(sock_fd, SOL_SOCKET, SO_LINGER, &ling, sizeof(struct linger)) < 0)
-    {
-      close(sock_fd);
-      syslog(LOG_ERR, "%s: set LINGER failed %d wait 1s to repeat\r\n", __func__, errno);
-      goto retry;
-    }
-#endif
   ret = get_cellinfo(fd, &cellinfo);
   if (ret < 0)
     {
@@ -1258,7 +1229,7 @@ static int gps_service(int argc, char *argv[])
       return -1;
     }
 
-  currTime = (uint32_t)(gettime() / 1000);
+  currTime = gettime();
 
   if (gps_get_statistics(g_gps_statistics_path) != 0)
     {
@@ -1299,18 +1270,6 @@ static int gps_service(int argc, char *argv[])
     }
 
   syslog(LOG_INFO, "%s: gpstest running:%u,%u,%u,%s\n", __func__, curTestCase, testCaseStartTime, eclipseTime, start_reason);
-#if 0
-  if (eclipseTime >= g_gps_test_case_interval)
-    {
-      curTestCase = (curTestCase + 1) % (sizeof(g_gps_test_case) / sizeof(g_gps_test_case[0]));
-      gps_update_statistics(g_gps_statistics_path, GPS_STATISTICS_TEST_CASE_NUM, curTestCase);
-      gps_update_statistics(g_gps_statistics_path, GPS_STATISTICS_TEST_CASE_START_TIME, currTime);
-    }
-  if (testCaseStartTime == 0)
-    {
-      gps_update_statistics(g_gps_statistics_path, GPS_STATISTICS_TEST_CASE_START_TIME, currTime);
-    }
-#endif
   syslog(LOG_INFO, "%s: gpstest cur case:%u\n", __func__, curTestCase);
 
   if (g_gps_statistics_array[GPS_STATISTICS_NB_START_TIME] == 0)
@@ -1539,7 +1498,7 @@ static int gps_service(int argc, char *argv[])
             }
         }
 
-      eclipseTime = getEclipseTime(currTime, (uint32_t)(gettime() / 1000));
+      eclipseTime = getEclipseTime(currTime, gettime());
       syslog(LOG_INFO, "gps nb cost time:%d\n", eclipseTime);
       if (eclipseTime <= seconds)
         {
@@ -1568,7 +1527,7 @@ static int gps_service(int argc, char *argv[])
             g_callback.sleeping(false);
           }
         }
-      currTime = (uint32_t)(gettime() / 1000);
+      currTime = gettime();
     }
 clean:
   if (g_rtcfd >= 0)
@@ -1587,8 +1546,6 @@ clean:
   syslog(LOG_INFO, "%s: quit\n", __func__);
   return -1;
 }
-
-
 
 int gpstest_main(int argc, char *argv[])
 {

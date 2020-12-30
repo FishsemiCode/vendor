@@ -38,6 +38,11 @@
 
 #include <nuttx/config.h>
 
+#include <sys/stat.h>
+#include <nuttx/ioexpander/gpio.h>
+#include <nuttx/ioexpander/ioexpander.h>
+#include <nuttx/fs/fs.h>
+
 #include <sys/ioctl.h>
 #include <sys/types.h>
 #include <fcntl.h>
@@ -61,18 +66,84 @@
  * rtc_test
  ****************************************************************************/
 
+static int gpio_port_register(int port, enum gpio_pintype_e type)
+{
+  char dev_name[16];
+  struct stat buf;
+  int ret;
+
+  if (type == GPIO_INPUT_PIN)
+    {
+      snprintf(dev_name, 16, "/dev/gpin%u", (unsigned int)port);
+      IOEXP_SETDIRECTION(g_ioe[0], port, IOEXPANDER_DIRECTION_IN);
+    }
+  else if (type == GPIO_OUTPUT_PIN)
+    {
+      snprintf(dev_name, 16, "/dev/gpout%u", (unsigned int)port);
+      IOEXP_SETDIRECTION(g_ioe[0], port, IOEXPANDER_DIRECTION_OUT);
+    }
+
+  ret = stat(dev_name, &buf);
+  if (ret == 0)
+    {
+      return ret;
+    }
+
+  return gpio_lower_half(g_ioe[0], (unsigned int)port, type, port);
+}
+
+static int gpio_port_write(int port, bool write_val)
+{
+  int fd, ret;
+  char dev_name[16];
+
+  snprintf(dev_name, 16, "/dev/gpout%u", (unsigned int)port);
+
+  fd = open(dev_name, O_RDONLY);
+  if (fd < 0)
+    {
+      printf("open %s failed\n", dev_name);
+      return -ENXIO;
+    }
+
+  ret = ioctl(fd, GPIOC_WRITE, (unsigned long)write_val);
+  if (ret)
+    {
+      printf("%s:P%u failed\n", __func__, (unsigned int)port);
+    }
+
+  close(fd);
+  return ret;
+}
+
 static int vbat_test(int port, int times)
 {
   int ret;
   int clientfd;
   int vbat;
   int i, j;
+  char * pboardid;
+  bool issetGPIO;
 
   clientfd = at_client_open();
   if(clientfd < 0)
     {
       syslog(LOG_ERR, "Open client error\n");
       return -1;
+    }
+
+  pboardid = getenv_global("board-id");
+  if(pboardid)
+    {
+      if((strncmp(pboardid, "U1BX", 4) == 0) || (strncmp(pboardid, "U1TK", 4) == 0))
+        {
+          issetGPIO = true;
+        }
+    }
+  if(issetGPIO)
+    {
+      gpio_port_register(39, GPIO_OUTPUT_PIN);
+      gpio_port_write(39, true);
     }
 
   for (i = 0; i < times; i++)
@@ -104,6 +175,11 @@ static int vbat_test(int port, int times)
     }
 
 clean:
+  if(issetGPIO)
+    {
+      gpio_port_register(39, GPIO_OUTPUT_PIN);
+      gpio_port_write(39, false);
+    }
   at_client_close(clientfd);
   return ret;
 }

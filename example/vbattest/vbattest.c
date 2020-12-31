@@ -42,6 +42,7 @@
 #include <nuttx/ioexpander/gpio.h>
 #include <nuttx/ioexpander/ioexpander.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/environ.h>
 
 #include <sys/ioctl.h>
 #include <sys/types.h>

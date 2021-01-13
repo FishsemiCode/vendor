@@ -1,0 +1,26 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config APP_FISHPM
+	bool "APP FISH PM"
+	default n
+
+if APP_FISHPM
+
+config APP_FISHPM_PRIORITY
+	int "fishpm task priority"
+	default 100
+
+config APP_FISHPM_STACKSIZE
+	int "fishpm stack size"
+	default 2048
+
+config FISHPM_AUTO_START
+	bool "fishpm auto start"
+	default n
+	---help---
+	Start the fishpm automatically.
+
+endif

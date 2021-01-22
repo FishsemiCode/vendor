@@ -1,0 +1,26 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config APP_FISHEFUSE
+	bool "APP EFUSE EXAMPLE"
+	default n
+
+if APP_FISHEFUSE
+
+config APP_FISHEFUSE_PRIORITY
+	int "fishefuse task priority"
+	default 100
+
+config APP_FISHEFUSE_STACKSIZE
+	int "fishefuse stack size"
+	default 2048
+
+config APP_FISHHELLO_AUTO_START
+	bool "fishefuse auto start"
+	default n
+	---help---
+	Start the fishefuse automatically.
+
+endif

@@ -682,7 +682,7 @@ retry:
   cnt++;
   if (cnt >= 3)
     {
-      syslog(LOG_ERR, "%s: send NB data failed after repeat 5 times\n", __func__);
+      syslog(LOG_ERR, "%s: send NB data failed after repeat 3 times\n", __func__);
       if (sentSize > 0)
         {
           gps_update_statistics(g_gps_statistics_path, GPS_STATISTICS_GPS_INFO_OFFSET, sentSize + gps_info_offset);
@@ -1476,7 +1476,12 @@ static int gps_service(int argc, char *argv[])
                   nbSentErrCnt++;
                   if (nbSentErrCnt > 5)
                     {
-                      board_reset(0);
+                      syslog(LOG_ERR, "nb send fail 5 times, cfun 0\n");
+                      if (set_radiopower(clientfd, false) < 0)
+                        {
+                          syslog(LOG_ERR, "%s: set_radiopower fail\n", __func__);
+                          increase_statistics(GPS_STATISTICS_STOP_NB_FAIL);
+                        }
                     }
                 }
               else

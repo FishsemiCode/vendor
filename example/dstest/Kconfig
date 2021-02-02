@@ -1,0 +1,23 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config DSTEST
+	bool "DSTEST"
+	default n
+	select ARCH_CHIP_SONG
+	---help---
+	Enable the DSTEST
+
+if DSTEST
+
+config DSTEST_PRIORITY
+	int "DSTEST config task priority"
+	default 100
+
+config DSTEST_STACKSIZE
+	int "DSTEST config stack size"
+	default 2048
+
+endif

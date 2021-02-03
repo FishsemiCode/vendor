@@ -68,6 +68,12 @@ int api_setnbpwr_main(int argc, char *argv[])
       return -1;
     }
 
+  if (set_radiopower(fd, false) < 0)
+    {
+      syslog(LOG_ERR, "%s: set_radiopower fail\n", __func__);
+      return -1;
+    }
+
   ret = set_pwrmaxvalue(fd, 20);
   if(ret < 0)
     {

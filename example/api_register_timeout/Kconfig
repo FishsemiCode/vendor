@@ -5,7 +5,7 @@
 
 config EXAMPLES_API_REGISTER_TIMEOUT
     tristate "api register timeout example"
-    default y
+    default n
     ---help---
         Enable the api register timeout example
 

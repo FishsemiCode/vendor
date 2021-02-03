@@ -5,7 +5,7 @@
 
 config EXAMPLES_API_SETNBPWR
     tristate "api set nb power example"
-    default y
+    default n
     ---help---
         Enable the api set nb power example
 

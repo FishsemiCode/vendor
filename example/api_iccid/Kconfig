@@ -5,7 +5,7 @@
 
 config EXAMPLES_API_ICCID
     tristate "api iccid example"
-    default y
+    default n
     ---help---
         Enable the api iccid example
 

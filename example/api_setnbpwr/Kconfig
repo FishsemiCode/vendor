@@ -1,0 +1,26 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config EXAMPLES_API_SETNBPWR
+    tristate "api set nb power example"
+    default y
+    ---help---
+        Enable the api set nb power example
+
+if EXAMPLES_API_SETNBPWR
+
+config EXAMPLES_API_SETNBPWR_PROGNAME
+    string "Program name"
+    default "api_setnbpwr"
+
+config EXAMPLES_API_SETNBPWR_PRIORITY
+    int "api set nb power task priority"
+    default 100
+
+config EXAMPLES_API_SETNBPWR_STACKSIZE
+    int "api set nb power stack size"
+    default 2048
+
+endif

@@ -90,7 +90,7 @@ int api_register_timeout_main(int argc, char *argv[])
 #endif
 {
   int fd = -1;
-  int ret = -1;
+  int ret = 0;
   int regErrCnt = 0;
   syslog(LOG_INFO, "api register timeout test...\n");
   pthread_mutex_init(&g_nb_mutex, NULL);
@@ -108,7 +108,7 @@ int api_register_timeout_main(int argc, char *argv[])
   if(ret < 0)
     {
       syslog(LOG_ERR, "%s: register_indication fail\n", __func__);
-      return -1;
+      goto clean;
     }
   syslog(LOG_INFO, "[%s]ret:%d\n", __func__, ret);
 
@@ -116,7 +116,7 @@ int api_register_timeout_main(int argc, char *argv[])
   if (ret < 0)
     {
       syslog(LOG_ERR, "set_ceregindicationstatus fail\n");
-      return -1;
+      goto clean;
     }
 
   sleep(5);
@@ -147,5 +147,13 @@ int api_register_timeout_main(int argc, char *argv[])
     }
   syslog(LOG_INFO, "api register end\n");
 
-  return 0;
+clean:
+  if(fd >= 0)
+    {
+      at_client_close(fd);
+    }
+  pthread_mutex_destroy(&g_nb_mutex);
+  pthread_cond_destroy(&g_nb_cond);
+  syslog(LOG_INFO, "%s:quit\n", __func__);
+  return ret;
 }

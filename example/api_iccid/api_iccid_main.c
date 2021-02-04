@@ -57,7 +57,7 @@ int api_iccid_main(int argc, char *argv[])
 #endif
 {
   int fd = -1;
-  int ret = -1;
+  int ret = 0;
   at_spi_iccid iccid;
   syslog(LOG_INFO, "api iccid test...\n");
 
@@ -72,9 +72,15 @@ int api_iccid_main(int argc, char *argv[])
   if (ret < 0)
     {
       syslog(LOG_ERR, "%s: get_iccid fail\n", __func__);
-      return -1;
+      goto clean;
     }
   syslog(LOG_INFO, "[%s]iccid:%s\n", __func__, iccid.iccid);
 
-  return 0;
+clean:
+  if(fd >= 0)
+    {
+      at_client_close(fd);
+    }
+  syslog(LOG_INFO, "%s:quit\n", __func__);
+  return ret;
 }

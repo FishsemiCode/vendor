@@ -57,7 +57,7 @@ int api_setnbpwr_main(int argc, char *argv[])
 #endif
 {
   int fd = -1;
-  int ret = -1;
+  int ret = 0;
   int pwr = -1;
   syslog(LOG_INFO, "api setnbpwr test...\n");
 
@@ -68,21 +68,28 @@ int api_setnbpwr_main(int argc, char *argv[])
       return -1;
     }
 
-  if (set_radiopower(fd, false) < 0)
+  ret = set_radiopower(fd, false);
+  if (ret < 0)
     {
       syslog(LOG_ERR, "%s: set_radiopower fail\n", __func__);
-      return -1;
+      goto clean;
     }
 
   ret = set_pwrmaxvalue(fd, 20);
   if(ret < 0)
     {
       syslog(LOG_ERR, "%s: set pwrmaxvalue fail\n", __func__);
-      return -1;
+      goto clean;
     }
 
   get_pwrmaxvalue(fd, &pwr);
   syslog(LOG_INFO, "%s: get nb power:%d\n", __func__, pwr);
 
-  return 0;
+clean:
+  if(fd >= 0)
+    {
+      at_client_close(fd);
+    }
+  syslog(LOG_INFO, "%s:quit\n", __func__);
+  return ret;
 }

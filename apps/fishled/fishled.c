@@ -52,6 +52,7 @@
  * fishled_main
  ****************************************************************************/
 
+#ifndef CONFIG_U1_APFACTORY
 int fishled_main(int argc, char *argv[])
 {
   bool set, get;
@@ -90,3 +91,29 @@ int fishled_main(int argc, char *argv[])
   close(fd);
   return ret;
 }
+#else
+int fishled_main(int argc, char *argv[])
+{
+  bool set;
+  int ret;
+  int fd;
+
+  fd = open("/dev/fishled", 0);
+  if (fd < 0)
+    {
+      printf("open device failed %d\n", errno);
+      return errno;
+    }
+
+  set = true;
+
+  ret = ioctl(fd, FISHLED_SET, set);
+  if (ret)
+    {
+      printf("fishled set failed\n");
+    }
+
+  close(fd);
+  return ret;
+}
+#endif

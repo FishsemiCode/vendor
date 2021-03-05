@@ -123,6 +123,7 @@ typedef enum
   GPS_STATISTICS_PAR_ACTIONAFTERNBSENT,
   GPS_STATISTICS_PAR_GPSREMAINTESTCOUNT,
   GPS_STATISTICS_PAR_NBREMAINTTESTCOUNT,
+  GPS_STATISTICS_PAR_GPSWROKEDCOUNT,
   GPS_STATISTICS_COUNT,
 }GPS_STATISTICS;
 
@@ -205,7 +206,6 @@ static uint32_t getEclipseTime(uint32_t startTime, uint32_t endTime)
       return 0;
     }
 }
-
 
 ssize_t gps_safe_write(int fd, const void *buf, size_t len)
 {
@@ -629,8 +629,10 @@ static int get_gps_info(int fd, int seconds, int nbSendInterval)
       g_callback.gpsActivity(GPS_ACTIVITY_NONE);
     }
 
+  gps_update_statistics(g_gps_statistics_path, GPS_STATISTICS_PAR_GPSWROKEDCOUNT, ++g_gps_statistics_array[GPS_STATISTICS_PAR_GPSWROKEDCOUNT]);
+
   currTime = gettime();
-  if (currTime - g_gps_statistics_array[GPS_STATISTICS_NB_START_TIME] >= nbSendInterval || seconds == nbSendInterval)
+  if(g_gps_statistics_array[GPS_STATISTICS_PAR_GPSWROKEDCOUNT] % (nbSendInterval/seconds) == 0)
     {
       // start NB
       syslog(LOG_INFO, "%s: Start NB CFUN=1\n", __func__);
@@ -1259,6 +1261,7 @@ static int gps_service(int argc, char *argv[])
       gps_update_statistics(g_gps_statistics_path, GPS_STATISTICS_PAR_ACTIONAFTERNBSENT, 0);
       gps_update_statistics(g_gps_statistics_path, GPS_STATISTICS_PAR_GPSREMAINTESTCOUNT, 0);
       gps_update_statistics(g_gps_statistics_path, GPS_STATISTICS_PAR_NBREMAINTTESTCOUNT, 0);
+      gps_update_statistics(g_gps_statistics_path, GPS_STATISTICS_PAR_GPSWROKEDCOUNT, 0);
     }
 
   curTestCase = g_gps_statistics_array[GPS_STATISTICS_TEST_CASE_NUM];

@@ -72,7 +72,7 @@
  ****************************************************************************/
 
 // TO-DO:
-#define REMOTE_IPADDR           "101.200.151.218"   // Server IP Address
+#define REMOTE_IPADDR           "223.71.18.62"   // Server IP Address
 #define REMOTE_TCPPORT          5678           // Server TCP port number
 
 #define MSS 1400

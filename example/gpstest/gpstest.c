@@ -1301,6 +1301,16 @@ static int gps_service(int argc, char *argv[])
             }
         }
     }
+  else
+    {
+      //Default Param
+      seconds = 180;
+      nbSendInterval = 900;
+      enterDs = 0;
+      actionAfterNbSent = 0;
+      gpsTestCount = 5000;
+      nbTestCount = 1000;
+    }
 
   if(g_gps_statistics_array[GPS_STATISTICS_PAR_GPSREMAINTESTCOUNT] > 0)
     {

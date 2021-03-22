@@ -1,0 +1,26 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config EXAMPLES_API_DCELLSYSINFO
+    tristate "api dcellsysinfo example"
+    default n
+    ---help---
+        Enable the api dcellsysinfo example
+
+if EXAMPLES_API_DCELLSYSINFO
+
+config EXAMPLES_API_DCELLSYSINFO_PROGNAME
+    string "Program name"
+    default "api_dcellsysinfo"
+
+config EXAMPLES_API_DCELLSYSINFO_PRIORITY
+    int "api dcellsysinfo task priority"
+    default 100
+
+config EXAMPLES_API_DCELLSYSINFO_STACKSIZE
+    int "api dcellsysinfo stack size"
+    default 2048
+
+endif

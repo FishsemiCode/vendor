@@ -555,18 +555,6 @@ static int get_gps_info(int fd, int seconds, int nbSendInterval)
         getEclipseTime(g_gps_statistics_array[GPS_STATISTICS_GPS_EPHEMERIS_SAVE_TIME], currTime) > 60 * 60) &&
         bNeedSaveEphemerics)
         {
-          uint32_t sleepSeconds = getEclipseTime(g_gps_position_start_time, g_gps_position_end_time);
-
-          if (sleepSeconds >= 45)
-            {
-              sleepSeconds = 15;
-            }
-          else
-            {
-              sleepSeconds = 45 - sleepSeconds < 15 ? 15 : 45 - sleepSeconds;
-            }
-          syslog(LOG_INFO, "%s: wait %ds to save GPS parameters\n", __func__, sleepSeconds);
-          sleep(sleepSeconds);
           g_gps_flag = 2;
           gps_update_statistics(g_gps_statistics_path, GPS_STATISTICS_GPS_EPHEMERIS_SAVE_TIME, currTime);
         }

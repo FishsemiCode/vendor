@@ -1,0 +1,24 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+config CODEC2TEST
+	bool "CODEC2TEST"
+	default n
+	---help---
+	Enable the Codec2 test
+
+if CODEC2TEST
+
+config CODEC2TEST_STACKSIZE
+	int "codec2 test task stack size"
+	default 16384
+	---help---
+	The stack size allocated for the codec2test task.
+
+
+config CODEC2TEST_PRIORITY
+	int "codec2 test priority"
+	default 100
+
+endif # CODEC2TEST

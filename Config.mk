@@ -96,6 +96,10 @@ ifneq ($(CONFIG_CODEC_FDKAAC),)
     EXXFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(APPDIR)/external/system/codec/fdk-aac/libPCMutils/include}
 endif
 
+ifneq ($(CONFIG_CODEC_CODEC2),)
+    EFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(APPDIR)/external/system/codec/codec2}
+endif
+
 ifneq ($(CONFIG_CODEC_TMWVT),)
     EFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(APPDIR)/external/system/codec/tmwvt}
 endif

@@ -1,0 +1,27 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+config SENDATCMD
+	bool "SENDATCMD"
+	default n
+	select SERVICES_RIL
+	---help---
+	Enable the SENDATCMD
+
+if SENDATCMD
+
+config SENDATCMD_PRIORITY
+	int "sendatcmd task priority"
+	default 80
+	---help---
+	The priority for sendatcmd task.
+
+config SENDATCMD_STACKSIZE
+	int "sendatcmd task stack size"
+	default 2048
+	---help---
+	The stack size allocated for the sendatcmd task.
+
+endif # SENDATCMD
+
